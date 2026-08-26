@@ -71,6 +71,14 @@ export function useCamera(): UseCameraReturn {
 
       setStream(mediaStream);
 
+      // Fiabilise la détection : iOS peut renvoyer une caméra différente de celle
+      // demandée. On lit la vraie caméra active depuis les réglages de la piste vidéo.
+      const videoTrack = mediaStream.getVideoTracks()[0];
+      const actualFacing = videoTrack?.getSettings().facingMode;
+      if (actualFacing === 'user' || actualFacing === 'environment') {
+        setFacingMode(actualFacing);
+      }
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
 

@@ -202,29 +202,31 @@ export function Viewfinder({
       {/* === BARRE SUPÉRIEURE : statut + actions === */}
       <div className="absolute top-0 left-0 right-0 z-30 px-3 pt-3">
         {/* Rangée principale */}
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center justify-between gap-2">
           {/* Gauche : compteur de poses */}
           <FilmCounter />
 
           {/* Droite : ratio + profil + galerie (une seule rangée) */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Badge ratio */}
-            <span className="h-9 flex items-center px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[10px] font-mono text-vintage-accent/80 whitespace-nowrap">
+            <span className="h-9 flex items-center px-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[9px] font-mono text-vintage-accent/80 whitespace-nowrap shrink-0">
               {RATIO_LABELS[aspectRatio] ?? aspectRatio}
             </span>
 
             {/* Profil couleur */}
             <button
               onClick={onOpenRollSelector}
-              className="h-9 px-2.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-xs font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap"
+              className="h-9 max-w-[96px] px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-[11px] font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap overflow-hidden shrink-0"
             >
-              {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
+              <span className="truncate">
+                {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
+              </span>
             </button>
 
             {/* Galerie / rouleau */}
             <button
               onClick={onOpenGallery}
-              className="relative w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+              className="relative w-9 h-9 shrink-0 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
               aria-label="Voir le rouleau"
             >
               🎞️
@@ -241,17 +243,17 @@ export function Viewfinder({
         {(isTakingWindowOver && !isLocked) || isLocked || takingTimeRemaining ? (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {isTakingWindowOver && !isLocked && (
-              <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400">
+              <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400 whitespace-nowrap">
                 ⏰ Temps écoulé
               </div>
             )}
             {isLocked && timeRemaining && (
-              <div className="px-3 py-1 rounded-full bg-vintage-accent/20 backdrop-blur-sm border border-vintage-accent/40 text-[11px] font-mono text-vintage-accent">
+              <div className="px-3 py-1 rounded-full bg-vintage-accent/20 backdrop-blur-sm border border-vintage-accent/40 text-[11px] font-mono text-vintage-accent whitespace-nowrap">
                 🔒 {timeRemaining}
               </div>
             )}
             {takingTimeRemaining && (
-              <div className="px-3 py-1 rounded-full bg-vintage-surface/50 backdrop-blur-sm border border-vintage-border/40 text-[11px] font-mono text-vintage-muted">
+              <div className="px-3 py-1 rounded-full bg-vintage-surface/50 backdrop-blur-sm border border-vintage-border/40 text-[11px] font-mono text-vintage-muted whitespace-nowrap">
                 {takingTimeRemaining}
               </div>
             )}

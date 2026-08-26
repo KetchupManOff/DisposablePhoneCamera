@@ -7,14 +7,14 @@ export function FilmCounter() {
   const remaining = Math.max(0, maxPoses - photosCount);
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50">
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 shrink-0">
       <span className="text-vintage-accent font-mono text-sm tracking-wider">
         {remaining}
       </span>
-      <span className="text-vintage-muted text-xs font-mono">
+      <span className="text-vintage-muted text-[11px] font-mono">
         / {maxPoses}
       </span>
-      <span className="text-vintage-muted text-xs ml-1">📸</span>
+      <span className="text-vintage-muted text-[11px] ml-0.5">📸</span>
     </div>
   );
 }
