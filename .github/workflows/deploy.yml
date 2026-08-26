@@ -51,5 +51,12 @@ jobs:
           git rm -rf --ignore-unmatch -q .
           cp -R "$GITHUB_WORKSPACE/dist"/. .
           git add -A
+
+          # Skip if the build is byte-identical to the last deploy
+          if git diff --cached --quiet; then
+            echo "No changes since last deploy; nothing to push."
+            exit 0
+          fi
+
           git commit -m "deploy $(date +'%Y-%m-%d %H:%M')"
-          git push -f origin dist
+          git push origin dist
