@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Base reset for mobile camera app --- */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #0f0f1a;
+}
+
+/* --- Vintage viewfinder overlay --- */
+.viewfinder-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.viewfinder-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(196, 164, 62, 0.3);
+  border-radius: 4px;
+}
+
+.viewfinder-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+}
+
+.viewfinder-crosshair::before,
+.viewfinder-crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(196, 164, 62, 0.5);
+}
+
+.viewfinder-crosshair::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.viewfinder-crosshair::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+/* --- Shutter flash animation --- */
+.shutter-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 100;
+  pointer-events: none;
+  animation: shutterFlash 0.35s ease-out forwards;
+}
+
+@keyframes shutterFlash {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* --- Scrollbar hide --- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

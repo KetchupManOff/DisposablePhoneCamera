@@ -1,0 +1,105 @@
+import { useCallback } from 'react';
+import { db } from '../lib/db';
+import { encrypt } from '../lib/crypto';
+import { useStore } from '../store/useStore';
+import type { CapturedPhoto } from '../types';
+import { PROFILES } from '../lib/colorProfiles';
+import { applyProfile, captureFrame } from '../lib/imageProcessor';
+
+interface UseFilmRollReturn {
+  /** Capture une photo depuis le stream vidéo et la stocke */
+  capturePhoto: (video: HTMLVideoElement) => Promise<CapturedPhoto | null>;
+  /** Nombre de poses restantes */
+  remainingPoses: number;
+  /** Rouleau plein ? */
+  isFull: boolean;
+  /** Peut-on encore prendre des photos (deadline non dépassée) ? */
+  canTakePhotos: boolean;
+}
+
+export function useFilmRoll(): UseFilmRollReturn {
+  const project = useStore((s) => s.currentProject());
+  const addPhotoToCurrentProject = useStore((s) => s.addPhotoToCurrentProject);
+  const triggerFlash = useStore((s) => s.triggerFlash);
+
+  const maxPoses = project?.maxPoses ?? 0;
+  const photos = project?.photos ?? [];
+  const remainingPoses = Math.max(0, maxPoses - photos.length);
+  const isFull = remainingPoses <= 0;
+
+  const takingDeadline = project?.takingDeadline ?? null;
+  const canTakePhotos =
+    !isFull && (takingDeadline === null || Date.now() < takingDeadline);
+
+  const capturePhoto = useCallback(
+    async (video: HTMLVideoElement): Promise<CapturedPhoto | null> => {
+      const currentProject = useStore.getState().currentProject();
+      if (!currentProject) return null;
+      if (!video.videoWidth || !video.videoHeight) return null;
+
+      const currentPhotos = currentProject.photos;
+      if (currentPhotos.length >= currentProject.maxPoses) return null;
+
+      // Vérifier la deadline
+      if (
+        currentProject.takingDeadline &&
+        Date.now() >= currentProject.takingDeadline
+      ) {
+        return null;
+      }
+
+      // 1. Capturer le frame vidéo (recadré au ratio configuré)
+      const frameCanvas = captureFrame(video, currentProject.aspectRatio);
+
+      // 2. Récupérer ImageData
+      const ctx = frameCanvas.getContext('2d')!;
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        frameCanvas.width,
+        frameCanvas.height,
+      );
+
+      // 3. Appliquer le profil couleur
+      const profile = PROFILES[currentProject.colorProfile];
+      const processedCanvas = applyProfile(imageData, profile);
+
+      // 4. Convertir en dataURL
+      const dataUrl = processedCanvas.toDataURL('image/jpeg', 0.85);
+
+      // 5. Chiffrer (obfuscation)
+      const encrypted = encrypt(dataUrl);
+
+      // 6. Construire l'objet photo
+      const photo: CapturedPhoto = {
+        id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        profile: currentProject.colorProfile,
+        timestamp: Date.now(),
+        blob: new Blob([encrypted], { type: 'text/plain' }),
+      };
+
+      // 7. Persister dans IndexedDB
+      await db.photos.put({
+        id: photo.id,
+        projectId: currentProject.id,
+        profile: photo.profile,
+        timestamp: photo.timestamp,
+        dataUrl: encrypted,
+      });
+
+      // 8. Mettre à jour le store
+      addPhotoToCurrentProject(photo);
+      triggerFlash();
+
+      return photo;
+    },
+    [addPhotoToCurrentProject, triggerFlash],
+  );
+
+  return {
+    capturePhoto,
+    remainingPoses,
+    isFull,
+    canTakePhotos,
+  };
+}
