@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Télécharger le certificat</title>
+  <style>
+    body {
+      font-family: -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 400px;
+    }
+    h1 { color: #e94560; margin-top: 0; }
+    a {
+      display: inline-block;
+      background: #e94560;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 16px 0;
+      font-size: 16px;
+    }
+    ol { text-align: left; line-height: 1.8; padding-left: 20px; }
+    .warning { background: #ffc10722; border: 1px solid #ffc10744; border-radius: 8px; padding: 12px; margin-top: 20px; font-size: 13px; color: #ffc107; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔐 Certificat HTTPS</h1>
+    <p>Télécharge et installe ce certificat pour que Safari accepte la connexion sécurisée.</p>
+    <a href="/cert.pem" download="dispoCam.crt">📥 Télécharger le certificat</a>
+    <ol>
+      <li>Touche <strong>"Autoriser"</strong> si demandé</li>
+      <li>Va dans <strong>Réglages → Général → Gestion de l'appareil</strong> (ou "Profil")</li>
+      <li>Touche le profil <strong>localhost</strong> → Installer</li>
+      <li>Va dans <strong>Réglages → Général → Infos → Confiance des certificats</strong></li>
+      <li>Active <strong>localhost (DispoCam Dev)</strong></li>
+    </ol>
+    <div class="warning">⚠️ Après le test, tu peux supprimer ce certificat dans Réglages → Général → Gestion de l'appareil.</div>
+    <p style="margin-top:20px; font-size:14px;">Ensuite, retourne sur :<br><strong style="color:#e94560;">https://192.168.0.18:5173</strong></p>
+  </div>
+</body>
+</html>
