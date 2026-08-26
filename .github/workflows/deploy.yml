@@ -29,12 +29,27 @@ jobs:
 
       - name: 🚀 Push built files to dist branch
         run: |
-          cd dist
-          git init
-          git checkout -b dist
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+
+          # Clone the existing dist branch so each deploy commit stays on top of
+          # the previous one (linear history => Hostinger's `git pull` fast-forwards
+          # instead of hitting "divergent branches").
+          rm -rf "$RUNNER_TEMP/deploy"
+          git clone --depth 50 --single-branch --branch dist \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+            "$RUNNER_TEMP/deploy" \
+            || git init -b dist "$RUNNER_TEMP/deploy"
+
+          cd "$RUNNER_TEMP/deploy"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Replace tracked files with the fresh build output
+          git rm -rf --ignore-unmatch -q .
+          cp -R "$GITHUB_WORKSPACE/dist"/. .
+          git add -A
           git commit -m "deploy $(date +'%Y-%m-%d %H:%M')"
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push -f origin dist
