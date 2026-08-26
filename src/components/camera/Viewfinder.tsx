@@ -116,7 +116,7 @@ export function Viewfinder({
   onOpenGallery,
   onOpenAbout,
 }: ViewfinderProps) {
-  const { videoRef, error, isLoading, isReady, switchCamera } = useCamera();
+  const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const { currentProfile } = useColorProfile();
@@ -134,8 +134,8 @@ export function Viewfinder({
     setFlash(true);
     setTimeout(() => setFlash(false), 350);
 
-    await capturePhoto(videoRef.current);
-  }, [videoRef, canTakePhotos, capturePhoto, isReady]);
+    await capturePhoto(videoRef.current, isBackCamera);
+  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera]);
 
   // Prise de photo via boutons de volume (Media Session)
   useVolumeCapture(() => {
@@ -165,7 +165,7 @@ export function Viewfinder({
         playsInline
         muted
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: 'scaleX(-1)' }} // Miroir pour visée naturelle
+        style={{ transform: isBackCamera ? 'scaleX(-1)' : undefined }}
       />
 
       {/* Masque de ratio (zone capturée) */}

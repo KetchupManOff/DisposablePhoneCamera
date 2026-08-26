@@ -153,6 +153,7 @@ export function applyProfile(
 export function captureFrame(
   video: HTMLVideoElement,
   aspectRatio?: AspectRatio,
+  mirror = false,
 ): HTMLCanvasElement {
   const srcW = video.videoWidth;
   const srcH = video.videoHeight;
@@ -195,7 +196,12 @@ export function captureFrame(
   canvas.height = outH;
   const ctx = canvas.getContext('2d')!;
 
-  // Flip horizontal pour simuler un miroir si caméra frontale
+  // Miroir horizontal (uniquement pour la caméra arrière)
+  if (mirror) {
+    ctx.translate(outW, 0);
+    ctx.scale(-1, 1);
+  }
+
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
   return canvas;
 }

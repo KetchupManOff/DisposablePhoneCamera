@@ -8,7 +8,7 @@ import { applyProfile, captureFrame } from '../lib/imageProcessor';
 
 interface UseFilmRollReturn {
   /** Capture une photo depuis le stream vidéo et la stocke */
-  capturePhoto: (video: HTMLVideoElement) => Promise<CapturedPhoto | null>;
+  capturePhoto: (video: HTMLVideoElement, mirror?: boolean) => Promise<CapturedPhoto | null>;
   /** Nombre de poses restantes */
   remainingPoses: number;
   /** Rouleau plein ? */
@@ -32,7 +32,7 @@ export function useFilmRoll(): UseFilmRollReturn {
     !isFull && (takingDeadline === null || Date.now() < takingDeadline);
 
   const capturePhoto = useCallback(
-    async (video: HTMLVideoElement): Promise<CapturedPhoto | null> => {
+    async (video: HTMLVideoElement, mirror = false): Promise<CapturedPhoto | null> => {
       const currentProject = useStore.getState().currentProject();
       if (!currentProject) return null;
       if (!video.videoWidth || !video.videoHeight) return null;
@@ -49,7 +49,7 @@ export function useFilmRoll(): UseFilmRollReturn {
       }
 
       // 1. Capturer le frame vidéo (recadré au ratio configuré)
-      const frameCanvas = captureFrame(video, currentProject.aspectRatio);
+      const frameCanvas = captureFrame(video, currentProject.aspectRatio, mirror);
 
       // 2. Récupérer ImageData
       const ctx = frameCanvas.getContext('2d')!;

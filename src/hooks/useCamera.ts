@@ -13,6 +13,10 @@ interface UseCameraReturn {
   isReady: boolean;
   /** Appareils disponibles */
   devices: MediaDeviceInfo[];
+  /** Caméra active ('environment' = dos, 'user' = avant) */
+  facingMode: 'user' | 'environment';
+  /** Vrai si la caméra arrière (dos) est active */
+  isBackCamera: boolean;
   /** Basculer entre caméras avant/arrière */
   switchCamera: () => void;
   /** Reprendre le flux (après une pause/veille) */
@@ -28,7 +32,7 @@ export function useCamera(): UseCameraReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const facingMode = useRef<'user' | 'environment'>('environment');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   const stopCamera = useCallback(() => {
     if (stream) {
@@ -38,9 +42,10 @@ export function useCamera(): UseCameraReturn {
     }
   }, [stream]);
 
-  const startCamera = useCallback(async (facing: 'user' | 'environment' = facingMode.current) => {
+  const startCamera = useCallback(async (facing: 'user' | 'environment' = 'environment') => {
     setIsLoading(true);
     setError(null);
+    setFacingMode(facing);
     stopCamera();
 
     // Contexte non-sécurisé : pas de caméra possible (iOS/Safari l'exigent)
@@ -105,9 +110,9 @@ export function useCamera(): UseCameraReturn {
   }, [stopCamera]);
 
   const switchCamera = useCallback(() => {
-    facingMode.current = facingMode.current === 'environment' ? 'user' : 'environment';
-    startCamera(facingMode.current);
-  }, [startCamera]);
+    const next = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera(next);
+  }, [facingMode, startCamera]);
 
   // Démarrage automatique
   useEffect(() => {
@@ -124,6 +129,8 @@ export function useCamera(): UseCameraReturn {
     isLoading,
     isReady,
     devices,
+    facingMode,
+    isBackCamera: facingMode === 'environment',
     switchCamera,
     startCamera,
     stopCamera,
