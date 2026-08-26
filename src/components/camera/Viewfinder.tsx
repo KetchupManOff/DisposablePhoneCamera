@@ -6,6 +6,7 @@ import { ShutterButton } from './ShutterButton';
 import { FilmCounter } from './FilmCounter';
 import { useColorProfile } from '../../hooks/useColorProfile';
 import { useVolumeCapture } from '../../hooks/useVolumeCapture';
+import { useLockTimer } from '../../hooks/useLockTimer';
 
 interface ViewfinderProps {
   onOpenRollSelector: () => void;
@@ -123,6 +124,7 @@ export function Viewfinder({
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const photosCount = currentProject?.photos.length ?? 0;
+  const { isLocked, timeRemaining, takingTimeRemaining, isTakingWindowOver } = useLockTimer();
 
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !canTakePhotos) return;
@@ -197,41 +199,64 @@ export function Viewfinder({
         </div>
       )}
 
-      {/* === BARRE SUPÉRIEURE === */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 pt-5 gap-2">
-        {/* Colonne gauche : compteur + ratio */}
-        <div className="flex items-center gap-2">
+      {/* === BARRE SUPÉRIEURE : statut + actions === */}
+      <div className="absolute top-0 left-0 right-0 z-30 px-3 pt-3">
+        {/* Rangée principale */}
+        <div className="flex items-start justify-between gap-2">
+          {/* Gauche : compteur de poses */}
           <FilmCounter />
-          {/* Badge ratio */}
-          <span className="px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[10px] font-mono text-vintage-accent/80 whitespace-nowrap">
-            {RATIO_LABELS[aspectRatio] ?? aspectRatio}
-          </span>
+
+          {/* Droite : ratio + profil + galerie (une seule rangée) */}
+          <div className="flex items-center gap-1.5">
+            {/* Badge ratio */}
+            <span className="h-9 flex items-center px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[10px] font-mono text-vintage-accent/80 whitespace-nowrap">
+              {RATIO_LABELS[aspectRatio] ?? aspectRatio}
+            </span>
+
+            {/* Profil couleur */}
+            <button
+              onClick={onOpenRollSelector}
+              className="h-9 px-2.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-xs font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap"
+            >
+              {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
+            </button>
+
+            {/* Galerie / rouleau */}
+            <button
+              onClick={onOpenGallery}
+              className="relative w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+              aria-label="Voir le rouleau"
+            >
+              🎞️
+              {photosCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vintage-accent text-[9px] font-mono text-black flex items-center justify-center leading-none">
+                  {photosCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Colonne droite : profil + galerie */}
-        <div className="flex items-center gap-2">
-          {/* Profil couleur */}
-          <button
-            onClick={onOpenRollSelector}
-            className="px-2.5 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-xs font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors whitespace-nowrap"
-          >
-            {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
-          </button>
-
-          {/* Galerie / rouleau */}
-          <button
-            onClick={onOpenGallery}
-            className="relative w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-            aria-label="Voir le rouleau"
-          >
-            🎞️
-            {photosCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vintage-accent text-[9px] font-mono text-black flex items-center justify-center leading-none">
-                {photosCount}
-              </span>
+        {/* Bande de statut dédiée : sous la barre, jamais sur les coins */}
+        {(isTakingWindowOver && !isLocked) || isLocked || takingTimeRemaining ? (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {isTakingWindowOver && !isLocked && (
+              <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400">
+                ⏰ Temps écoulé
+              </div>
             )}
-          </button>
-        </div>
+            {isLocked && timeRemaining && (
+              <div className="px-3 py-1 rounded-full bg-vintage-accent/20 backdrop-blur-sm border border-vintage-accent/40 text-[11px] font-mono text-vintage-accent">
+                🔒 {timeRemaining}
+              </div>
+            )}
+            {takingTimeRemaining && (
+              <div className="px-3 py-1 rounded-full bg-vintage-surface/50 backdrop-blur-sm border border-vintage-border/40 text-[11px] font-mono text-vintage-muted">
+                {takingTimeRemaining}
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
 
       {/* === BARRE INFÉRIEURE === */}

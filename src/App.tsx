@@ -7,7 +7,6 @@ import { CreateProject } from './components/project/CreateProject';
 import { TipButton } from './components/tips/TipButton';
 import { Toast } from './components/ui/Toast';
 import { useStore } from './store/useStore';
-import { useLockTimer } from './hooks/useLockTimer';
 import { useHydrateStore } from './hooks/useHydrateStore';
 
 enum Screen {
@@ -28,7 +27,6 @@ export default function App() {
     projects.length === 0 ? Screen.Projects : Screen.Camera
   );
   const [toast, setToast] = useState({ visible: false, message: '' });
-  const { isLocked, timeRemaining, takingTimeRemaining, isTakingWindowOver } = useLockTimer();
   const showToast = useCallback((message: string) => { setToast({ visible: true, message }); }, []);
   const dismissToast = useCallback(() => { setToast((prev) => ({ ...prev, visible: false })); }, []);
   const needsProject = currentProjectId === null && screen !== Screen.CreateProject;
@@ -48,33 +46,12 @@ export default function App() {
         />
       )}
       {screen === Screen.Camera && currentProjectId !== null && (
-        <>
-          <Viewfinder
-            onOpenRollSelector={() => setScreen(Screen.Projects)}
-            onOpenTimerSettings={() => setScreen(Screen.Timer)}
-            onOpenGallery={() => setScreen(Screen.Gallery)}
-            onOpenAbout={() => setScreen(Screen.About)}
-          />
-
-          <div className="absolute top-0 right-0 z-40 p-4 pt-6 flex flex-col items-end gap-1">
-            {isTakingWindowOver && !isLocked && (
-              <div className="px-3 py-1.5 rounded-full bg-vintage-danger/10 backdrop-blur-sm border border-vintage-danger/30 text-xs font-mono text-red-400">
-                ⏰ Temps écoulé
-              </div>
-            )}
-            {isLocked && timeRemaining && (
-              <div className="px-3 py-1.5 rounded-full bg-vintage-accent/10 backdrop-blur-sm border border-vintage-accent/30 text-xs font-mono text-vintage-accent">
-                🔒 {timeRemaining}
-              </div>
-            )}
-            {takingTimeRemaining && (
-              <div className="px-3 py-1.5 rounded-full bg-vintage-surface/40 backdrop-blur-sm border border-vintage-border/30 text-[10px] font-mono text-vintage-muted">
-                {takingTimeRemaining}
-              </div>
-            )}
-          </div>
-
-        </>
+        <Viewfinder
+          onOpenRollSelector={() => setScreen(Screen.Projects)}
+          onOpenTimerSettings={() => setScreen(Screen.Timer)}
+          onOpenGallery={() => setScreen(Screen.Gallery)}
+          onOpenAbout={() => setScreen(Screen.About)}
+        />
       )}
 
       {screen === Screen.Timer && currentProjectId !== null && (
