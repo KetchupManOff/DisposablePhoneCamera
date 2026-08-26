@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useCamera } from '../../hooks/useCamera';
 import { useFilmRoll } from '../../hooks/useFilmRoll';
@@ -10,17 +10,119 @@ import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 interface ViewfinderProps {
   onOpenRollSelector: () => void;
   onOpenTimerSettings: () => void;
+  onOpenGallery: () => void;
+  onOpenAbout: () => void;
+}
+
+const RATIO_LABELS: Record<string, string> = {
+  '1:1': '⬜ 1:1',
+  '3:2': '📐 3:2',
+  '4:3': '📐 4:3',
+  '16:9': '🎬 16:9',
+};
+
+/**
+ * Affiche un masque semi-transparent qui révèle uniquement la zone
+ * qui sera effectivement capturée selon le ratio configuré sur le projet.
+ */
+function AspectRatioMask({ aspectRatio }: { aspectRatio: string }) {
+  const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
+
+  useEffect(() => {
+    const onResize = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const mask = useMemo(() => {
+    const ratioMap: Record<string, number> = {
+      '1:1': 1,
+      '3:2': 3 / 2,
+      '4:3': 4 / 3,
+      '16:9': 16 / 9,
+    };
+    const targetRatio = ratioMap[aspectRatio] ?? dims.w / dims.h;
+    const screenRatio = dims.w / dims.h;
+
+    if (Math.abs(targetRatio - screenRatio) < 0.01) {
+      return { top: 0, bottom: 0, left: 0, right: 0 };
+    }
+
+    if (targetRatio > screenRatio) {
+      const visibleH = dims.w / targetRatio;
+      const barH = (dims.h - visibleH) / 2;
+      return { top: barH, bottom: barH, left: 0, right: 0 };
+    } else {
+      const visibleW = dims.h * targetRatio;
+      const barW = (dims.w - visibleW) / 2;
+      return { top: 0, bottom: 0, left: barW, right: barW };
+    }
+  }, [aspectRatio, dims]);
+
+  if (mask.left === 0 && mask.right === 0 && mask.top === 0 && mask.bottom === 0) {
+    return (
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        <div className="absolute inset-0 border-2 border-vintage-accent/40 rounded-sm" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none">
+      {mask.top > 0 && (
+        <div className="absolute left-0 right-0 bg-black/50 backdrop-blur-[1px]"
+          style={{ top: 0, height: mask.top }} />
+      )}
+      {mask.bottom > 0 && (
+        <div className="absolute left-0 right-0 bg-black/50 backdrop-blur-[1px]"
+          style={{ bottom: 0, height: mask.bottom }} />
+      )}
+      {mask.left > 0 && (
+        <div className="absolute top-0 bottom-0 bg-black/50 backdrop-blur-[1px]"
+          style={{ left: 0, width: mask.left }} />
+      )}
+      {mask.right > 0 && (
+        <div className="absolute top-0 bottom-0 bg-black/50 backdrop-blur-[1px]"
+          style={{ right: 0, width: mask.right }} />
+      )}
+      {/* Cadre doré */}
+      <div className="absolute border-2 border-vintage-accent/40 rounded-sm"
+        style={{ top: mask.top, bottom: mask.bottom, left: mask.left, right: mask.right }} />
+      {/* Coins accentués */}
+      {(['tl', 'tr', 'bl', 'br'] as const).map((corner) => (
+        <div
+          key={corner}
+          className="absolute w-4 h-4 border-vintage-accent/60"
+          style={{
+            top: corner.startsWith('t') ? (mask.top > 0 ? mask.top + 4 : 4) : undefined,
+            bottom: corner.startsWith('b') ? (mask.bottom > 0 ? mask.bottom + 4 : 4) : undefined,
+            left: corner.endsWith('l') ? (mask.left > 0 ? mask.left + 4 : 4) : undefined,
+            right: corner.endsWith('r') ? (mask.right > 0 ? mask.right + 4 : 4) : undefined,
+            borderTop: corner.startsWith('t') ? '2px solid' : 'none',
+            borderBottom: corner.startsWith('b') ? '2px solid' : 'none',
+            borderLeft: corner.endsWith('l') ? '2px solid' : 'none',
+            borderRight: corner.endsWith('r') ? '2px solid' : 'none',
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function Viewfinder({
   onOpenRollSelector,
   onOpenTimerSettings,
+  onOpenGallery,
+  onOpenAbout,
 }: ViewfinderProps) {
   const { videoRef, error, isLoading, isReady, switchCamera } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const { currentProfile } = useColorProfile();
   const [flash, setFlash] = useState(false);
+
+  const aspectRatio = currentProject?.aspectRatio ?? '3:2';
+  const photosCount = currentProject?.photos.length ?? 0;
 
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !canTakePhotos) return;
@@ -64,10 +166,13 @@ export function Viewfinder({
         style={{ transform: 'scaleX(-1)' }} // Miroir pour visée naturelle
       />
 
+      {/* Masque de ratio (zone capturée) */}
+      <AspectRatioMask aspectRatio={aspectRatio} />
+
       {/* Flash obturateur */}
       {flash && <div className="shutter-flash" />}
 
-      {/* Overlay viseur vintage */}
+      {/* Crosshair vintage subtil */}
       <div className="viewfinder-overlay">
         <div className="viewfinder-crosshair" />
       </div>
@@ -92,51 +197,91 @@ export function Viewfinder({
         </div>
       )}
 
-      {/* Barre supérieure */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 pt-6">
-        {/* Compteur de poses */}
-        <FilmCounter />
+      {/* === BARRE SUPÉRIEURE === */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-3 pt-5 gap-2">
+        {/* Colonne gauche : compteur + ratio */}
+        <div className="flex items-center gap-2">
+          <FilmCounter />
+          {/* Badge ratio */}
+          <span className="px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[10px] font-mono text-vintage-accent/80 whitespace-nowrap">
+            {RATIO_LABELS[aspectRatio] ?? aspectRatio}
+          </span>
+        </div>
 
-        {/* Indicateur profil */}
-        <button
-          onClick={onOpenRollSelector}
-          className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-xs font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors"
-        >
-          {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
-        </button>
+        {/* Colonne droite : profil + galerie */}
+        <div className="flex items-center gap-2">
+          {/* Profil couleur */}
+          <button
+            onClick={onOpenRollSelector}
+            className="px-2.5 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-xs font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors whitespace-nowrap"
+          >
+            {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
+          </button>
+
+          {/* Galerie / rouleau */}
+          <button
+            onClick={onOpenGallery}
+            className="relative w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+            aria-label="Voir le rouleau"
+          >
+            🎞️
+            {photosCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vintage-accent text-[9px] font-mono text-black flex items-center justify-center leading-none">
+                {photosCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Barre inférieure */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between p-4 pb-8">
-        {/* Bouton timer */}
-        <button
-          onClick={onOpenTimerSettings}
-          className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-lg hover:border-vintage-accent/60 transition-colors"
-          aria-label="Minuteur de développement"
-        >
-          ⏳
-        </button>
+      {/* === BARRE INFÉRIEURE === */}
+      <div className="absolute bottom-0 left-0 right-0 z-30">
+        {/* Rangée principale : boutons d'action */}
+        <div className="flex items-center justify-between px-4 pb-3">
+          {/* Groupe gauche : timer + about */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenTimerSettings}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+              aria-label="Minuteur de développement"
+            >
+              ⏳
+            </button>
+            <button
+              onClick={onOpenAbout}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"
+              aria-label="À propos"
+            >
+              ⓘ
+            </button>
+          </div>
 
-        {/* Déclencheur */}
-        <ShutterButton
-          onCapture={handleCapture}
-          disabled={!isReady || isLoading}
-          remainingPoses={remainingPoses}
-        />
+          {/* Déclencheur (centre) */}
+          <ShutterButton
+            onCapture={handleCapture}
+            disabled={!isReady || isLoading}
+            remainingPoses={remainingPoses}
+          />
 
-        {/* Bouton switch caméra */}
-        <button
-          onClick={switchCamera}
-          className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-lg hover:border-vintage-accent/60 transition-colors"
-          aria-label="Changer de caméra"
-        >
-          🔄
-        </button>
+          {/* Groupe droite : switch caméra */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={switchCamera}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+              aria-label="Changer de caméra"
+            >
+              🔄
+            </button>
+          </div>
+        </div>
+
+        {/* Safe area spacer pour les devices avec home indicator */}
+        <div className="h-5" />
       </div>
 
       {/* Indicateur rouleau plein ou temps écoulé */}
       {(isFull || !canTakePhotos) && (
-        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40">
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40">
           <p className="text-xs font-mono text-red-400 text-center">
             {isFull ? `Rouleau plein — ${currentProject?.maxPoses ?? '?'}/${currentProject?.maxPoses ?? '?'} 📸` : '⏰ Fenêtre de prise de vue terminée'}
           </p>

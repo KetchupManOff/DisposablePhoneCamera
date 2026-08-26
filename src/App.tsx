@@ -24,8 +24,6 @@ export default function App() {
 
   const projects = useStore((s) => s.projects);
   const currentProjectId = useStore((s) => s.currentProjectId);
-  const currentProject = useStore((s) => s.currentProject());
-  const photos = currentProject?.photos ?? [];
   const [screen, setScreen] = useState<Screen>(
     projects.length === 0 ? Screen.Projects : Screen.Camera
   );
@@ -54,6 +52,8 @@ export default function App() {
           <Viewfinder
             onOpenRollSelector={() => setScreen(Screen.Projects)}
             onOpenTimerSettings={() => setScreen(Screen.Timer)}
+            onOpenGallery={() => setScreen(Screen.Gallery)}
+            onOpenAbout={() => setScreen(Screen.About)}
           />
 
           <div className="absolute top-0 right-0 z-40 p-4 pt-6 flex flex-col items-end gap-1">
@@ -74,26 +74,6 @@ export default function App() {
             )}
           </div>
 
-          <button
-            onClick={() => setScreen(Screen.Gallery)}
-            className="absolute top-4 right-4 z-40 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-lg hover:border-vintage-accent/60 transition-colors mt-20"
-            aria-label="Voir le rouleau"
-          >
-            🎞️
-            {photos.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-vintage-accent text-[10px] font-mono text-black flex items-center justify-center">
-                {photos.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setScreen(Screen.About)}
-            className="absolute bottom-4 left-4 z-40 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"
-            aria-label="À propos"
-          >
-            ⓘ
-          </button>
         </>
       )}
 
