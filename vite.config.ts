@@ -25,6 +25,7 @@ function getHttpsConfig(): ServerOptions['https'] {
 }
 
 export default defineConfig({
+  base: '/camera/',
   server: {
     https: getHttpsConfig(),
     host: '0.0.0.0',
@@ -51,21 +52,21 @@ export default defineConfig({
         background_color: '#0f0f1a',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: '/camera/',
+        scope: '/camera/',
         icons: [
           {
-            src: '/icons/icon-192.png',
+            src: '/camera/icons/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/icons/icon-512.png',
+            src: '/camera/icons/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/icons/icon-512.png',
+            src: '/camera/icons/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
