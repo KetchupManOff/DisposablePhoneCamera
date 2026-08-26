@@ -25,9 +25,22 @@ jobs:
       - name: 🏗️ Build Project
         run: npm run build
 
-      - name: 📂 Deploy to Hostinger via rsync
+      - name: 📂 Deploy to Hostinger via lftp
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
-          mkdir -p ~/.ssh
-          ssh-keyscan -p 22 -H ${{ secrets.FTP_SERVER }} >> ~/.ssh/known_hosts 2>/dev/null || true
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" rsync -avz -e "ssh -p 22 -o StrictHostKeyChecking=no" --delete dist/ ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }}:public_html/camera/
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+          lftp -e "
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force true;
+            set ftp:ssl-protect-data true;
+            set ssl:verify-certificate no;
+            set ftp:passive-mode true;
+            set net:timeout 30;
+            set net:max-retries 2;
+            open -u ${USERNAME},${PASSWORD} ${HOST};
+            mirror -R -v --delete --parallel=5 dist/ public_html/camera/;
+            bye;
+          "
+        env:
+          HOST: ${{ secrets.FTP_SERVER }}
+          USERNAME: ${{ secrets.FTP_USERNAME }}
+          PASSWORD: ${{ secrets.FTP_PASSWORD }}
