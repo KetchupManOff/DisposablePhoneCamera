@@ -4,25 +4,36 @@ import { VitePWA } from 'vite-plugin-pwa';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { ServerOptions } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// 🔐 Charger les certs SSL seulement si elles existent (développement local)
+// Sur GitHub Actions (CI), ces fichiers n'existent pas → pas de HTTPS
+function getHttpsConfig(): ServerOptions['https'] {
+  const keyPath = path.resolve(__dirname, 'certs/key.pem');
+  const certPath = path.resolve(__dirname, 'certs/cert.pem');
+
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+    return {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+  }
+  // En CI/build → pas de HTTPS, on retourne undefined
+  return undefined;
+}
+
 export default defineConfig({
   server: {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem')),
-    },
+    https: getHttpsConfig(),
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
     allowedHosts: true,
   },
   preview: {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'certs/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'certs/cert.pem')),
-    },
+    https: getHttpsConfig(),
     host: '0.0.0.0',
     allowedHosts: true,
   },
