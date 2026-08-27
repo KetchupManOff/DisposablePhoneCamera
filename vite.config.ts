@@ -51,7 +51,7 @@ export default defineConfig({
         theme_color: '#1a1a2e',
         background_color: '#0f0f1a',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         start_url: '/camera/',
         scope: '/camera/',
         icons: [

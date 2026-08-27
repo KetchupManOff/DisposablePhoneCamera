@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useStore } from '../../store/useStore';
 import { useCamera } from '../../hooks/useCamera';
 import { useFilmRoll } from '../../hooks/useFilmRoll';
@@ -28,14 +28,34 @@ const RATIO_LABELS: Record<string, string> = {
  * Affiche un masque semi-transparent qui révèle uniquement la zone
  * qui sera effectivement capturée selon le ratio configuré sur le projet.
  */
-function AspectRatioMask({ aspectRatio }: { aspectRatio: string }) {
-  const [dims, setDims] = useState({ w: window.innerWidth, h: window.innerHeight });
+function AspectRatioMask({
+  aspectRatio,
+  viewportRef,
+}: {
+  aspectRatio: string;
+  viewportRef: React.RefObject<HTMLDivElement>;
+}) {
+  const [dims, setDims] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
-    const onResize = () => setDims({ w: window.innerWidth, h: window.innerHeight });
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setDims({ w: rect.width, h: rect.height });
+    };
+
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    window.addEventListener('resize', update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [viewportRef]);
 
   const mask = useMemo(() => {
     const ratioMap: Record<string, number> = {
@@ -61,6 +81,8 @@ function AspectRatioMask({ aspectRatio }: { aspectRatio: string }) {
       return { top: 0, bottom: 0, left: barW, right: barW };
     }
   }, [aspectRatio, dims]);
+
+  if (dims.w === 0 || dims.h === 0) return null;
 
   if (mask.left === 0 && mask.right === 0 && mask.top === 0 && mask.bottom === 0) {
     return (
@@ -125,6 +147,7 @@ export function Viewfinder({
   const camera = getCamera(currentProject?.cameraId ?? null);
   const [flash, setFlash] = useState(false);
   const [isCranked, setIsCranked] = useState(false);
+  const previewAreaRef = useRef<HTMLDivElement>(null);
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const photosCount = currentProject?.photos.length ?? 0;
@@ -172,181 +195,180 @@ export function Viewfinder({
   }, [currentProject?.id]);
 
   return (
-    <div className="relative w-full h-full bg-black overflow-hidden">
-      {/* Flux vidéo */}
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: !isBackCamera ? 'scaleX(-1)' : undefined }}
-      />
+    <div className="w-full h-full bg-black overflow-hidden flex flex-col landscape:flex-row">
+      {/* === ZONE CAMÉRA === */}
+      <div className="relative flex-1 min-h-0 min-w-0 flex flex-col">
+        {/* === BARRE SUPÉRIEURE : statut + actions === */}
+        <div
+          className="z-30 px-3 pb-2"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+        >
 
-      {/* Masque de ratio (zone capturée) */}
-      <AspectRatioMask aspectRatio={aspectRatio} />
+          {/* Rangée principale */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Gauche : compteur de poses */}
+            <FilmCounter />
 
-      {/* Flash obturateur */}
-      {flash && <div className="shutter-flash" />}
-
-      {/* Crosshair vintage subtil */}
-      <div className="viewfinder-overlay">
-        <div className="viewfinder-crosshair" />
-      </div>
-
-      {/* Indicateur de chargement */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-vintage-bg/80 z-20">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-vintage-accent border-t-transparent rounded-full animate-spin" />
-            <p className="text-vintage-muted text-sm font-mono">Chargement...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Erreur caméra */}
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-vintage-bg/90 z-20 p-6">
-          <div className="text-center max-w-xs">
-            <p className="text-vintage-text text-lg mb-2">📵</p>
-            <p className="text-vintage-muted text-sm">{error}</p>
-          </div>
-        </div>
-      )}
-
-      {/* === MOLETTE D'ARMEMENT (crinquage) === */}
-      {canTakePhotos && (
-        <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
-      )}
-
-      {/* === LÈVRE SUPÉRIEURE : compense l'encoche / la caméra qui coupe l'écran === */}
-      <div
-        className="absolute top-0 left-0 right-0 z-20 bg-black"
-        style={{ height: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
-      />
-
-      {/* === BARRE SUPÉRIEURE : statut + actions === */}
-      <div
-        className="absolute top-0 left-0 right-0 z-30 px-3"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
-      >
-        {/* Rangée principale */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Gauche : compteur de poses */}
-          <FilmCounter />
-
-          {/* Droite : ratio + profil + galerie (une seule rangée) */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Badge ratio */}
-            <span className="h-9 flex items-center px-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[9px] font-mono text-vintage-accent/80 whitespace-nowrap shrink-0">
-              {RATIO_LABELS[aspectRatio] ?? aspectRatio}
-            </span>
-
-            {/* Profil couleur */}
-            <button
-              onClick={onOpenRollSelector}
-              className="h-9 max-w-[96px] px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-[11px] font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap overflow-hidden shrink-0"
-            >
-              <span className="truncate">
-                {currentProject?.mode === 'simple' && camera
-                  ? `${camera.emoji} ${camera.label}`
-                  : `${currentProfile?.emoji ?? '🎞️'} ${currentProfile?.label ?? 'Film'}`}
+            {/* Droite : ratio + profil + galerie (une seule rangée) */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Badge ratio */}
+              <span className="h-9 flex items-center px-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[9px] font-mono text-vintage-accent/80 whitespace-nowrap shrink-0">
+                {RATIO_LABELS[aspectRatio] ?? aspectRatio}
               </span>
-            </button>
 
-            {/* Galerie / rouleau */}
-            <button
-              onClick={onOpenGallery}
-              className="relative w-9 h-9 shrink-0 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-              aria-label="Voir le rouleau"
-            >
-              🎞️
-              {photosCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vintage-accent text-[9px] font-mono text-black flex items-center justify-center leading-none">
-                  {photosCount}
+              {/* Profil couleur */}
+              <button
+                onClick={onOpenRollSelector}
+                className="h-9 max-w-[96px] px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-[11px] font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap overflow-hidden shrink-0"
+              >
+                <span className="truncate">
+                  {currentProject?.mode === 'simple' && camera
+                    ? `${camera.emoji} ${camera.label}`
+                    : `${currentProfile?.emoji ?? '🎞️'} ${currentProfile?.label ?? 'Film'}`}
                 </span>
-              )}
-            </button>
+              </button>
+
+              {/* Galerie / rouleau */}
+              <button
+                onClick={onOpenGallery}
+                className="relative w-9 h-9 shrink-0 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+                aria-label="Voir le rouleau"
+              >
+                🎞️
+                {photosCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-vintage-accent text-[9px] font-mono text-black flex items-center justify-center leading-none">
+                    {photosCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
+
+          {/* Bande de statut dédiée : sous la barre, jamais sur les coins */}
+          {(isTakingWindowOver && !isLocked) || isLocked || takingTimeRemaining ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {isTakingWindowOver && !isLocked && (
+                <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400 whitespace-nowrap">
+                  ⏰ Temps écoulé
+                </div>
+              )}
+              {isLocked && timeRemaining && (
+                <div className="px-3 py-1 rounded-full bg-vintage-accent/20 backdrop-blur-sm border border-vintage-accent/40 text-[11px] font-mono text-vintage-accent whitespace-nowrap">
+                  🔒 {timeRemaining}
+                </div>
+              )}
+              {takingTimeRemaining && (
+                <div className="px-3 py-1 rounded-full bg-vintage-surface/50 backdrop-blur-sm border border-vintage-border/40 text-[11px] font-mono text-vintage-muted whitespace-nowrap">
+                  {takingTimeRemaining}
+                </div>
+              )}
+            </div>
+          ) : null}
         </div>
 
-        {/* Bande de statut dédiée : sous la barre, jamais sur les coins */}
-        {(isTakingWindowOver && !isLocked) || isLocked || takingTimeRemaining ? (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            {isTakingWindowOver && !isLocked && (
-              <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400 whitespace-nowrap">
-                ⏰ Temps écoulé
-              </div>
-            )}
-            {isLocked && timeRemaining && (
-              <div className="px-3 py-1 rounded-full bg-vintage-accent/20 backdrop-blur-sm border border-vintage-accent/40 text-[11px] font-mono text-vintage-accent whitespace-nowrap">
-                🔒 {timeRemaining}
-              </div>
-            )}
-            {takingTimeRemaining && (
-              <div className="px-3 py-1 rounded-full bg-vintage-surface/50 backdrop-blur-sm border border-vintage-border/40 text-[11px] font-mono text-vintage-muted whitespace-nowrap">
-                {takingTimeRemaining}
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
-
-      {/* === BARRE INFÉRIEURE === */}
-      <div className="absolute bottom-0 left-0 right-0 z-30">
-        {/* Rangée principale : boutons d'action */}
-        <div className="flex items-center justify-between px-4 pb-3">
-          {/* Groupe gauche : timer + about */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenTimerSettings}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-              aria-label="Minuteur de développement"
-            >
-              ⏳
-            </button>
-            <button
-              onClick={onOpenAbout}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"
-              aria-label="À propos"
-            >
-              ⓘ
-            </button>
-          </div>
-
-          {/* Déclencheur (centre) */}
-          <ShutterButton
-            onCapture={handleCapture}
-            disabled={!isReady || isLoading}
-            remainingPoses={remainingPoses}
-            isCranked={isCranked}
+        {/* === PRÉVISUALISATION (le champ de la photo) === */}
+        <div ref={previewAreaRef} className="relative flex-1 min-h-0 min-w-0 overflow-hidden">
+          {/* Flux vidéo */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ transform: !isBackCamera ? 'scaleX(-1)' : undefined }}
           />
 
-          {/* Groupe droite : switch caméra */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={switchCamera}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-              aria-label="Changer de caméra"
-              title={facingMode === 'environment' ? 'Caméra arrière (dos)' : 'Caméra avant (selfie)'}
-            >
-              {facingMode === 'environment' ? '🎥' : '🤳'}
-            </button>
-          </div>
-        </div>
+          {/* Masque de ratio (zone capturée) */}
+          <AspectRatioMask aspectRatio={aspectRatio} viewportRef={previewAreaRef} />
 
-        {/* Safe area spacer pour les devices avec home indicator */}
-        <div style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }} />
+          {/* Flash obturateur */}
+          {flash && <div className="shutter-flash" />}
+
+          {/* Crosshair vintage subtil */}
+          <div className="viewfinder-overlay">
+            <div className="viewfinder-crosshair" />
+          </div>
+
+          {/* Indicateur rouleau plein ou temps écoulé */}
+          {(isFull || !canTakePhotos) && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40">
+              <p className="text-xs font-mono text-red-400 text-center">
+                {isFull ? `Rouleau plein — ${currentProject?.maxPoses ?? '?'}/${currentProject?.maxPoses ?? '?'} 📸` : '⏰ Fenêtre de prise de vue terminée'}
+              </p>
+            </div>
+          )}
+
+          {/* Indicateur de chargement */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-vintage-bg/80 z-20">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-vintage-accent border-t-transparent rounded-full animate-spin" />
+                <p className="text-vintage-muted text-sm font-mono">Chargement...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Erreur caméra */}
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center bg-vintage-bg/90 z-20 p-6">
+              <div className="text-center max-w-xs">
+                <p className="text-vintage-text text-lg mb-2">📵</p>
+                <p className="text-vintage-muted text-sm">{error}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Indicateur rouleau plein ou temps écoulé */}
-      {(isFull || !canTakePhotos) && (
-        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40">
-          <p className="text-xs font-mono text-red-400 text-center">
-            {isFull ? `Rouleau plein — ${currentProject?.maxPoses ?? '?'}/${currentProject?.maxPoses ?? '?'} 📸` : '⏰ Fenêtre de prise de vue terminée'}
-          </p>
+      {/* === PANNEAU DE CONTRÔLES (bas en portrait, droite en paysage) === */}
+      <div
+        className="shrink-0 z-30 flex flex-row landscape:flex-col items-center justify-between landscape:justify-center gap-3 border-t landscape:border-t-0 landscape:border-l border-vintage-border/40 bg-black/40 backdrop-blur-sm"
+        style={{
+          paddingTop: '16px',
+          paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+          paddingRight: 'calc(env(safe-area-inset-right, 0px) + 16px)',
+        }}
+      >
+        {/* Molette d'armement */}
+        {canTakePhotos && (
+          <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
+        )}
+
+        {/* Déclencheur */}
+        <ShutterButton
+          onCapture={handleCapture}
+          disabled={!isReady || isLoading}
+          remainingPoses={remainingPoses}
+          isCranked={isCranked}
+        />
+
+        {/* Boutons utilitaires : switch caméra, timer, à propos */}
+        <div className="flex flex-row landscape:flex-col items-center gap-1.5">
+          <button
+            onClick={switchCamera}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+            aria-label="Changer de caméra"
+            title={facingMode === 'environment' ? 'Caméra arrière (dos)' : 'Caméra avant (selfie)'}
+          >
+            {facingMode === 'environment' ? '🎥' : '🤳'}
+          </button>
+          <button
+            onClick={onOpenTimerSettings}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+            aria-label="Minuteur de développement"
+          >
+            ⏳
+          </button>
+          <button
+            onClick={onOpenAbout}
+            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"
+            aria-label="À propos"
+          >
+            ⓘ
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -126,7 +126,7 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
   const RING = 2 * Math.PI * 44; // circonférence du cercle SVG (r = 44)
 
   return (
-    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-2 shrink-0">
       <div
         ref={wheelRef}
         role="slider"
