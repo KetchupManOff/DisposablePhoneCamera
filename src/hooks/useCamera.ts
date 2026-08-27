@@ -2,67 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 type FacingMode = 'user' | 'environment';
 
-/** Marqueurs (localisés) présents dans le label d'une caméra avant. */
-const FRONT_MARKERS = [
-  'front', 'user', 'avant', 'frontal', 'delanter', 'frontale', 'vor',
-  '前面', '前置', '前摄像',
-];
-
-/** Marqueurs (localisés) présents dans le label d'une caméra arrière. */
-const BACK_MARKERS = [
-  'back', 'rear', 'environment', 'arrière', 'arriere', 'traser', 'trasera',
-  'hinter', 'haupt', 'principal', '后面', '背面', '后置', '后摄像',
-];
-
-/**
- * Détermine la vraie caméra active en croisant plusieurs signaux.
- * Sur iOS Safari, `getSettings().facingMode` est souvent vide/absent : on
- * s'appuie alors sur le `deviceId` croisé avec `enumerateDevices()`, puis sur le
- * `label` de la piste vidéo, et enfin on retombe sur la caméra demandée.
- */
-function detectFacing(
-  track: MediaStreamTrack | undefined,
-  requested: FacingMode,
-  devices: MediaDeviceInfo[],
-): FacingMode {
-  if (!track) return requested;
-
-  let settings: MediaTrackSettings | undefined;
-  try {
-    settings = track.getSettings();
-  } catch {
-    settings = undefined;
-  }
-
-  // 1. facingMode renseigné (Chrome/Android, iOS récent)
-  const fm = settings?.facingMode;
-  if (fm === 'user' || fm === 'environment') return fm;
-
-  const matches = (label: string, markers: string[]): boolean => {
-    const l = label.toLowerCase();
-    return markers.some((m) => l.includes(m));
-  };
-
-  // 2. deviceId croisé avec la liste des devices (labels lisibles après permission)
-  const deviceId = settings?.deviceId;
-  if (deviceId) {
-    const device = devices.find((d) => d.deviceId === deviceId);
-    if (device?.label) {
-      if (matches(device.label, FRONT_MARKERS)) return 'user';
-      if (matches(device.label, BACK_MARKERS)) return 'environment';
-    }
-  }
-
-  // 3. label de la piste vidéo (fiable sur iOS : « Caméra avant/arrière », etc.)
-  if (track.label) {
-    if (matches(track.label, FRONT_MARKERS)) return 'user';
-    if (matches(track.label, BACK_MARKERS)) return 'environment';
-  }
-
-  // 4. on fait confiance à la caméra demandée
-  return requested;
-}
-
 interface UseCameraReturn {
   /** Référence à attacher sur l'élément <video> */
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -134,16 +73,14 @@ export function useCamera(): UseCameraReturn {
 
       setStream(mediaStream);
 
-      const videoTrack = mediaStream.getVideoTracks()[0];
-
       // Lister les devices (labels disponibles car permission déjà accordée).
       const allDevices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
       setDevices(videoDevices);
 
-      // Détermine la vraie caméra active. Sur iOS Safari, `getSettings().facingMode`
-      // est souvent vide : on croise deviceId/label avec enumerateDevices().
-      setFacingMode(detectFacing(videoTrack, facing, videoDevices));
+      // Le miroir (isBackCamera) suit la caméra DEMANDÉE, pas la caméra détectée :
+      // `track.getSettings().facingMode` est peu fiable sur iOS Safari (souvent vide
+      // ou inversé), ce qui mettait le miroir sur la mauvaise caméra.
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
