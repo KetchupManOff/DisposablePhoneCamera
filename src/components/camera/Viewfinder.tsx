@@ -4,6 +4,7 @@ import { useCamera } from '../../hooks/useCamera';
 import { useFilmRoll } from '../../hooks/useFilmRoll';
 import { ShutterButton } from './ShutterButton';
 import { FilmCounter } from './FilmCounter';
+import { CrankWheel } from './CrankWheel';
 import { useColorProfile } from '../../hooks/useColorProfile';
 import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 import { useLockTimer } from '../../hooks/useLockTimer';
@@ -123,6 +124,7 @@ export function Viewfinder({
   const { currentProfile } = useColorProfile();
   const camera = getCamera(currentProject?.cameraId ?? null);
   const [flash, setFlash] = useState(false);
+  const [isCranked, setIsCranked] = useState(false);
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const photosCount = currentProject?.photos.length ?? 0;
@@ -131,14 +133,18 @@ export function Viewfinder({
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !canTakePhotos) return;
     if (!isReady) return;
+    if (!isCranked) return;
 
     // Flash de l'obturateur
     setFlash(true);
     setTimeout(() => setFlash(false), 350);
 
     // Miroir uniquement pour la caméra AVANT (selfie) : l'arrière reste normal.
-    await capturePhoto(videoRef.current, !isBackCamera);
-  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera]);
+    const photo = await capturePhoto(videoRef.current, !isBackCamera);
+    if (photo) {
+      setIsCranked(false);
+    }
+  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked]);
 
   // Prise de photo via boutons de volume (Media Session)
   useVolumeCapture(() => {
@@ -158,6 +164,12 @@ export function Viewfinder({
       document.removeEventListener('gestureend', preventGesture);
     };
   }, []);
+
+  // Chaque pose nécessite de ré-armer la molette. Changer de projet (nouvelle
+  // pellicule) réinitialise aussi l'armement.
+  useEffect(() => {
+    setIsCranked(false);
+  }, [currentProject?.id]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
@@ -200,6 +212,11 @@ export function Viewfinder({
             <p className="text-vintage-muted text-sm">{error}</p>
           </div>
         </div>
+      )}
+
+      {/* === MOLETTE D'ARMEMENT (crinquage) === */}
+      {canTakePhotos && (
+        <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
       )}
 
       {/* === LÈVRE SUPÉRIEURE : compense l'encoche / la caméra qui coupe l'écran === */}
@@ -302,6 +319,7 @@ export function Viewfinder({
             onCapture={handleCapture}
             disabled={!isReady || isLoading}
             remainingPoses={remainingPoses}
+            isCranked={isCranked}
           />
 
           {/* Groupe droite : switch caméra */}
