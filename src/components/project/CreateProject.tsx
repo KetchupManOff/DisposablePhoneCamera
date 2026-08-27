@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
@@ -75,10 +75,22 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const resolvedPoses: number =
     mode === 'simple' && camera ? camera.exposures : maxPoses;
 
-  const name =
+  // Nom auto-généré par défaut
+  const defaultName =
     mode === 'simple' && camera
       ? `${camera.label} ${projectCount + 1}`
       : `Pellicule ${projectCount + 1}`;
+
+  // État du nom personnalisable (pré-rempli avec le nom auto)
+  const [projectName, setProjectName] = useState(defaultName);
+  const nameEditedRef = useRef(false);
+
+  // Met à jour le nom seulement si l'utilisateur ne l'a pas modifié manuellement
+  useEffect(() => {
+    if (!nameEditedRef.current) {
+      setProjectName(defaultName);
+    }
+  }, [defaultName]);
 
   const handleCreate = useCallback(async () => {
     const now = Date.now();
@@ -101,7 +113,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
 
     const project: Project = {
       id: `project-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      name,
+      name: projectName,
       mode,
       cameraId: mode === 'simple' ? cameraId : null,
       colorProfile: resolvedProfile,
@@ -133,7 +145,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
     addProject(project);
     onCreated();
   }, [
-    name,
+    projectName,
     mode,
     cameraId,
     resolvedProfile,
@@ -174,11 +186,20 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
       </div>
 
       <div className="flex-1 p-4 space-y-6 pb-8">
-        {/* Nom auto */}
+        {/* Nom du projet (éditable) */}
         <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20">
-          <p className="text-xs font-mono text-vintage-muted mb-1">Nom</p>
-          <p className="text-vintage-text font-display">{name}</p>
-</div>
+          <p className="text-xs font-mono text-vintage-muted mb-2">Nom du projet</p>
+          <input
+            type="text"
+            value={projectName}
+            onChange={(e) => {
+              setProjectName(e.target.value);
+              nameEditedRef.current = true;
+            }}
+            className="w-full p-2 rounded-lg bg-vintage-surface/60 border border-vintage-border/40 text-vintage-text font-display text-sm focus:border-vintage-accent outline-none placeholder-vintage-muted/50"
+            placeholder="Nom de la pellicule..."
+          />
+        </div>
 
         {/* Sélecteur de mode */}
         <div>
