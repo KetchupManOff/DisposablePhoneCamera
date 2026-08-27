@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { useCamera } from '../../hooks/useCamera';
 import { useFilmRoll } from '../../hooks/useFilmRoll';
 import { OrientationToggle } from './OrientationToggle';
+import { ShutterButton } from './ShutterButton';
 import { FilmCounter } from './FilmCounter';
 import { CrankWheel } from './CrankWheel';
 import { useColorProfile } from '../../hooks/useColorProfile';
@@ -133,7 +134,7 @@ export function Viewfinder({
   onOpenAbout,
 }: ViewfinderProps) {
   const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
-  const { capturePhoto, isFull, canTakePhotos } = useFilmRoll();
+  const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const updateCurrentProjectSettings = useStore((s) => s.updateCurrentProjectSettings);
   const { currentProfile } = useColorProfile();
@@ -345,14 +346,20 @@ export function Viewfinder({
           <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
         )}
 
-        {/* Bascule portrait / paysage */}
-        <OrientationToggle
-          orientation={orientation}
-          onChange={toggleOrientation}
+        {/* Déclencheur (grand bouton) */}
+        <ShutterButton
+          onCapture={handleCapture}
+          disabled={!isReady || isLoading}
+          remainingPoses={remainingPoses}
+          isCranked={isCranked}
         />
 
-        {/* Boutons utilitaires : switch caméra, timer, à propos */}
+        {/* Boutons utilitaires : orientation, switch caméra, timer, à propos */}
         <div className="flex flex-row landscape:flex-col items-center gap-1.5">
+          <OrientationToggle
+            orientation={orientation}
+            onChange={toggleOrientation}
+          />
           <button
             onClick={switchCamera}
             className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
