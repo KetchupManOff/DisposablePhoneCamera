@@ -196,7 +196,7 @@ export function captureFrame(
   canvas.height = outH;
   const ctx = canvas.getContext('2d')!;
 
-  // Miroir horizontal (uniquement pour la caméra arrière)
+  // Miroir horizontal (uniquement pour la caméra avant / selfie)
   if (mirror) {
     ctx.translate(outW, 0);
     ctx.scale(-1, 1);

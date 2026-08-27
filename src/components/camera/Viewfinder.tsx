@@ -136,7 +136,8 @@ export function Viewfinder({
     setFlash(true);
     setTimeout(() => setFlash(false), 350);
 
-    await capturePhoto(videoRef.current, isBackCamera);
+    // Miroir uniquement pour la caméra AVANT (selfie) : l'arrière reste normal.
+    await capturePhoto(videoRef.current, !isBackCamera);
   }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera]);
 
   // Prise de photo via boutons de volume (Media Session)
@@ -167,7 +168,7 @@ export function Viewfinder({
         playsInline
         muted
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: isBackCamera ? 'scaleX(-1)' : undefined }}
+        style={{ transform: !isBackCamera ? 'scaleX(-1)' : undefined }}
       />
 
       {/* Masque de ratio (zone capturée) */}
