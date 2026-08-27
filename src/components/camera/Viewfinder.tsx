@@ -202,8 +202,17 @@ export function Viewfinder({
         </div>
       )}
 
+      {/* === LÈVRE SUPÉRIEURE : compense l'encoche / la caméra qui coupe l'écran === */}
+      <div
+        className="absolute top-0 left-0 right-0 z-20 bg-black"
+        style={{ height: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+      />
+
       {/* === BARRE SUPÉRIEURE : statut + actions === */}
-      <div className="absolute top-0 left-0 right-0 z-30 px-3 pt-3">
+      <div
+        className="absolute top-0 left-0 right-0 z-30 px-3"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+      >
         {/* Rangée principale */}
         <div className="flex items-center justify-between gap-2">
           {/* Gauche : compteur de poses */}
@@ -309,7 +318,7 @@ export function Viewfinder({
         </div>
 
         {/* Safe area spacer pour les devices avec home indicator */}
-        <div className="h-5" />
+        <div style={{ height: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }} />
       </div>
 
       {/* Indicateur rouleau plein ou temps écoulé */}

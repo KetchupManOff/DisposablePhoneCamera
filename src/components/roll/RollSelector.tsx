@@ -14,7 +14,7 @@ export function RollSelector({ isOpen, onClose }: RollSelectorProps) {
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-6 border-b border-vintage-border/30">
+      <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
         <h2 className="text-lg font-display text-vintage-text">Choisir un film</h2>
         <button
           onClick={onClose}

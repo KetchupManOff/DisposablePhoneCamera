@@ -96,3 +96,9 @@ body,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* --- Safe area helpers (encoche / Dynamic Island / home indicator) --- */
+/* `pt-safe-6` = l'espace de l'encoche + le padding normal de 1.5rem (24px). */
+.pt-safe-6 {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
+}

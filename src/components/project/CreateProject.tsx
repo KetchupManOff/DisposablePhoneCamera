@@ -161,7 +161,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-6 border-b border-vintage-border/30 sticky top-0 bg-vintage-bg z-10">
+      <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30 sticky top-0 bg-vintage-bg z-10">
         <h2 className="text-lg font-display text-vintage-text">Nouvelle pellicule</h2>
         <button
           onClick={onCancel}
