@@ -62,14 +62,33 @@ export function useCamera(): UseCameraReturn {
     }
 
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: facing,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-        audio: false,
-      });
+      // iOS Safari ignore parfois l'indice `facingMode` seul et retourne la mauvaise
+      // caméra. On force la caméra demandée avec `exact`, avec repli `ideal` pour les
+      // navigateurs qui refusent `exact` (OverconstrainedError).
+      let mediaStream: MediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { exact: facing },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+          audio: false,
+        });
+      } catch (exactErr) {
+        if (exactErr instanceof DOMException && exactErr.name === 'OverconstrainedError') {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: facing,
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+            },
+            audio: false,
+          });
+        } else {
+          throw exactErr;
+        }
+      }
 
       setStream(mediaStream);
 

@@ -117,7 +117,7 @@ export function Viewfinder({
   onOpenGallery,
   onOpenAbout,
 }: ViewfinderProps) {
-  const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera } = useCamera();
+  const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const { currentProfile } = useColorProfile();
@@ -300,8 +300,9 @@ export function Viewfinder({
               onClick={switchCamera}
               className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
               aria-label="Changer de caméra"
+              title={facingMode === 'environment' ? 'Caméra arrière (dos)' : 'Caméra avant (selfie)'}
             >
-              🔄
+              {facingMode === 'environment' ? '🎥' : '🤳'}
             </button>
           </div>
         </div>
