@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { db } from '../lib/db';
 import { useStore } from '../store/useStore';
-import type { Project, CapturedPhoto, AspectRatio, ColorProfile, ProjectMode } from '../types';
+import type { Project, CapturedPhoto, AspectRatio, Orientation, ColorProfile, ProjectMode } from '../types';
 
 /**
  * Hydrate le store Zustand depuis IndexedDB au démarrage de l'application.
@@ -46,6 +46,7 @@ export function useHydrateStore(): void {
           cameraId: sp.cameraId ?? null,
           colorProfile: sp.colorProfile as ColorProfile,
           aspectRatio: sp.aspectRatio as AspectRatio,
+          orientation: (sp.orientation as Orientation) || 'landscape',
           maxPoses: sp.maxPoses,
           photos: photosByProject[sp.id] || [],
           takingDeadline: sp.takingDeadline,

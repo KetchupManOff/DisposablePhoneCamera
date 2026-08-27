@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useStore } from '../../store/useStore';
 import { useCamera } from '../../hooks/useCamera';
 import { useFilmRoll } from '../../hooks/useFilmRoll';
-import { ShutterButton } from './ShutterButton';
+import { OrientationToggle } from './OrientationToggle';
 import { FilmCounter } from './FilmCounter';
 import { CrankWheel } from './CrankWheel';
 import { useColorProfile } from '../../hooks/useColorProfile';
@@ -10,6 +10,8 @@ import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 import { useLockTimer } from '../../hooks/useLockTimer';
 import { useShutterSound } from '../../hooks/useShutterSound';
 import { getCamera } from '../../lib/cameras';
+import { getEffectiveRatio, getRatioLabel } from '../../lib/ratio';
+import type { AspectRatio, Orientation } from '../../types';
 
 interface ViewfinderProps {
   onOpenRollSelector: () => void;
@@ -18,22 +20,17 @@ interface ViewfinderProps {
   onOpenAbout: () => void;
 }
 
-const RATIO_LABELS: Record<string, string> = {
-  '1:1': '⬜ 1:1',
-  '3:2': '📐 3:2',
-  '4:3': '📐 4:3',
-  '16:9': '🎬 16:9',
-};
-
 /**
  * Affiche un masque semi-transparent qui révèle uniquement la zone
  * qui sera effectivement capturée selon le ratio configuré sur le projet.
  */
 function AspectRatioMask({
   aspectRatio,
+  orientation,
   viewportRef,
 }: {
-  aspectRatio: string;
+  aspectRatio: AspectRatio;
+  orientation: Orientation;
   viewportRef: React.RefObject<HTMLDivElement>;
 }) {
   const [dims, setDims] = useState({ w: 0, h: 0 });
@@ -59,13 +56,7 @@ function AspectRatioMask({
   }, [viewportRef]);
 
   const mask = useMemo(() => {
-    const ratioMap: Record<string, number> = {
-      '1:1': 1,
-      '3:2': 3 / 2,
-      '4:3': 4 / 3,
-      '16:9': 16 / 9,
-    };
-    const targetRatio = ratioMap[aspectRatio] ?? dims.w / dims.h;
+    const targetRatio = getEffectiveRatio(aspectRatio, orientation);
     const screenRatio = dims.w / dims.h;
 
     if (Math.abs(targetRatio - screenRatio) < 0.01) {
@@ -81,7 +72,7 @@ function AspectRatioMask({
       const barW = (dims.w - visibleW) / 2;
       return { top: 0, bottom: 0, left: barW, right: barW };
     }
-  }, [aspectRatio, dims]);
+  }, [aspectRatio, orientation, dims]);
 
   if (dims.w === 0 || dims.h === 0) return null;
 
@@ -142,8 +133,9 @@ export function Viewfinder({
   onOpenAbout,
 }: ViewfinderProps) {
   const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
-  const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
+  const { capturePhoto, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
+  const updateCurrentProjectSettings = useStore((s) => s.updateCurrentProjectSettings);
   const { currentProfile } = useColorProfile();
   const camera = getCamera(currentProject?.cameraId ?? null);
   const [flash, setFlash] = useState(false);
@@ -152,8 +144,15 @@ export function Viewfinder({
   const playShutter = useShutterSound();
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
+  const orientation = currentProject?.orientation ?? 'landscape';
   const photosCount = currentProject?.photos.length ?? 0;
   const { isLocked, timeRemaining, takingTimeRemaining, isTakingWindowOver } = useLockTimer();
+
+  const ratioBadge = useMemo(() => {
+    if (aspectRatio === '1:1') return '⬜ 1:1';
+    const emoji = aspectRatio === '16:9' ? '🎬' : '📐';
+    return `${emoji} ${getRatioLabel(aspectRatio, orientation)}`;
+  }, [aspectRatio, orientation]);
 
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !canTakePhotos) return;
@@ -173,6 +172,12 @@ export function Viewfinder({
       setIsCranked(false);
     }
   }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked, playShutter]);
+
+  const toggleOrientation = useCallback(() => {
+    updateCurrentProjectSettings({
+      orientation: orientation === 'portrait' ? 'landscape' : 'portrait',
+    });
+  }, [orientation, updateCurrentProjectSettings]);
 
   // Prise de photo via boutons de volume (Media Session)
   useVolumeCapture(() => {
@@ -218,7 +223,7 @@ export function Viewfinder({
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Badge ratio */}
               <span className="h-9 flex items-center px-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-accent/30 text-[9px] font-mono text-vintage-accent/80 whitespace-nowrap shrink-0">
-                {RATIO_LABELS[aspectRatio] ?? aspectRatio}
+                {ratioBadge}
               </span>
 
               {/* Profil couleur */}
@@ -284,7 +289,7 @@ export function Viewfinder({
           />
 
           {/* Masque de ratio (zone capturée) */}
-          <AspectRatioMask aspectRatio={aspectRatio} viewportRef={previewAreaRef} />
+          <AspectRatioMask aspectRatio={aspectRatio} orientation={orientation} viewportRef={previewAreaRef} />
 
           {/* Flash obturateur */}
           {flash && <div className="shutter-flash" />}
@@ -340,12 +345,10 @@ export function Viewfinder({
           <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
         )}
 
-        {/* Déclencheur */}
-        <ShutterButton
-          onCapture={handleCapture}
-          disabled={!isReady || isLoading}
-          remainingPoses={remainingPoses}
-          isCranked={isCranked}
+        {/* Bascule portrait / paysage */}
+        <OrientationToggle
+          orientation={orientation}
+          onChange={toggleOrientation}
         />
 
         {/* Boutons utilitaires : switch caméra, timer, à propos */}

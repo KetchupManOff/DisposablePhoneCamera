@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore';
 import type { CapturedPhoto } from '../types';
 import { PROFILES } from '../lib/colorProfiles';
 import { applyProfile, captureFrame } from '../lib/imageProcessor';
+import { getEffectiveRatio } from '../lib/ratio';
 
 interface UseFilmRollReturn {
   /** Capture une photo depuis le stream vidéo et la stocke */
@@ -48,8 +49,12 @@ export function useFilmRoll(): UseFilmRollReturn {
         return null;
       }
 
-      // 1. Capturer le frame vidéo (recadré au ratio configuré)
-      const frameCanvas = captureFrame(video, currentProject.aspectRatio, mirror);
+      // 1. Capturer le frame vidéo (recadré au ratio configuré, orienté)
+      const frameCanvas = captureFrame(
+        video,
+        getEffectiveRatio(currentProject.aspectRatio, currentProject.orientation ?? 'landscape'),
+        mirror,
+      );
 
       // 2. Récupérer ImageData
       const ctx = frameCanvas.getContext('2d')!;

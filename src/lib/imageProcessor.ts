@@ -1,5 +1,4 @@
 import type { ProfileDefinition } from './colorProfiles';
-import type { AspectRatio } from '../types';
 
 /**
  * Applique les filtres de profil couleur sur une image via Canvas 2D.
@@ -147,25 +146,19 @@ export function applyProfile(
 
 /**
  * Capture une frame d'un élément <video> dans un canvas.
- * Si un aspectRatio est fourni, l'image est recadrée (center-crop)
- * pour correspondre au ratio demandé.
+ * Si un ratio cible (largeur / hauteur) est fourni, l'image est
+ * recadrée (center-crop) pour correspondre à ce ratio.
  */
 export function captureFrame(
   video: HTMLVideoElement,
-  aspectRatio?: AspectRatio,
+  targetRatio?: number,
   mirror = false,
 ): HTMLCanvasElement {
   const srcW = video.videoWidth;
   const srcH = video.videoHeight;
 
-  // Ratio cible (largeur / hauteur)
-  const ratioMap: Record<AspectRatio, number> = {
-    '1:1': 1,
-    '3:2': 3 / 2,
-    '4:3': 4 / 3,
-    '16:9': 16 / 9,
-  };
-  const targetRatio = aspectRatio ? ratioMap[aspectRatio] : srcW / srcH;
+  // Ratio cible (largeur / hauteur). À défaut, on conserve le ratio natif.
+  const ratio = targetRatio ?? srcW / srcH;
 
   // Dimensions de sortie (on garde la plus grande dimension native et on recadre)
   let outW = srcW;
@@ -175,16 +168,16 @@ export function captureFrame(
   let sw = srcW;
   let sh = srcH;
 
-  if (targetRatio > srcW / srcH) {
+  if (ratio > srcW / srcH) {
     // Le ratio cible est plus large → recadrer en hauteur
     outW = srcW;
-    outH = Math.round(srcW / targetRatio);
+    outH = Math.round(srcW / ratio);
     sy = Math.round((srcH - outH) / 2);
     sw = srcW;
     sh = outH;
-  } else if (targetRatio < srcW / srcH) {
+  } else if (ratio < srcW / srcH) {
     // Le ratio cible est plus haut → recadrer en largeur
-    outW = Math.round(srcH * targetRatio);
+    outW = Math.round(srcH * ratio);
     outH = srcH;
     sx = Math.round((srcW - outW) / 2);
     sw = outW;

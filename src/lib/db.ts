@@ -17,6 +17,7 @@ export interface StoredProject {
   cameraId: string | null;
   colorProfile: string;
   aspectRatio: string;
+  orientation: string;
   maxPoses: number;
   takingDeadline: number | null;
   unlockAt: number | null;

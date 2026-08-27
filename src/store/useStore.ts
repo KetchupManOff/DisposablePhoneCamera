@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ColorProfile, AspectRatio, CapturedPhoto, Project } from '../types';
+import type { ColorProfile, AspectRatio, Orientation, CapturedPhoto, Project } from '../types';
 import { db } from '../lib/db';
 
 interface AppState {
@@ -20,7 +20,7 @@ interface AppState {
   setCurrentProjectPhotos: (photos: CapturedPhoto[]) => void;
   unlockCurrentProject: () => void;
   updateCurrentProjectTimer: (takingDeadline: number | null, unlockAt: number | null) => void;
-  updateCurrentProjectSettings: (settings: { colorProfile?: ColorProfile; aspectRatio?: AspectRatio }) => void;
+  updateCurrentProjectSettings: (settings: { colorProfile?: ColorProfile; aspectRatio?: AspectRatio; orientation?: Orientation }) => void;
 
   /* --- UI --- */
   flashTrigger: number;
@@ -126,10 +126,11 @@ export const useStore = create<AppState>((set, get) => ({
       const updated = [...state.projects];
       updated[idx] = { ...updated[idx], ...settings };
       // Persister
-      if (settings.colorProfile || settings.aspectRatio) {
+      if (settings.colorProfile || settings.aspectRatio || settings.orientation) {
         db.projects.update(state.currentProjectId!, {
           ...(settings.colorProfile && { colorProfile: settings.colorProfile }),
           ...(settings.aspectRatio && { aspectRatio: settings.aspectRatio }),
+          ...(settings.orientation && { orientation: settings.orientation }),
         }).catch(() => {});
       }
       return { projects: updated };

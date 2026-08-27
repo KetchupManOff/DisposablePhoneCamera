@@ -14,6 +14,8 @@ export type ColorProfile =
 
 export type AspectRatio = '1:1' | '3:2' | '4:3' | '16:9';
 
+export type Orientation = 'portrait' | 'landscape';
+
 /** Mode simple : caméra simulée (LUT + ratio imposés) · Mode control : réglages libres */
 export type ProjectMode = 'simple' | 'control';
 
@@ -34,6 +36,7 @@ export interface Project {
   cameraId: string | null;
   colorProfile: ColorProfile;
   aspectRatio: AspectRatio;
+  orientation: Orientation;
   maxPoses: number;
   photos: CapturedPhoto[];
   /** Date limite pour prendre des photos (timestamp ms) */
