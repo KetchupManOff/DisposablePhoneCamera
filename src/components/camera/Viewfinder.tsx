@@ -8,6 +8,7 @@ import { CrankWheel } from './CrankWheel';
 import { useColorProfile } from '../../hooks/useColorProfile';
 import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 import { useLockTimer } from '../../hooks/useLockTimer';
+import { useShutterSound } from '../../hooks/useShutterSound';
 import { getCamera } from '../../lib/cameras';
 
 interface ViewfinderProps {
@@ -148,6 +149,7 @@ export function Viewfinder({
   const [flash, setFlash] = useState(false);
   const [isCranked, setIsCranked] = useState(false);
   const previewAreaRef = useRef<HTMLDivElement>(null);
+  const playShutter = useShutterSound();
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const photosCount = currentProject?.photos.length ?? 0;
@@ -162,12 +164,15 @@ export function Viewfinder({
     setFlash(true);
     setTimeout(() => setFlash(false), 350);
 
+    // Son d'obturateur (déclenché en même temps que le flash)
+    playShutter();
+
     // Miroir uniquement pour la caméra AVANT (selfie) : l'arrière reste normal.
     const photo = await capturePhoto(videoRef.current, !isBackCamera);
     if (photo) {
       setIsCranked(false);
     }
-  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked]);
+  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked, playShutter]);
 
   // Prise de photo via boutons de volume (Media Session)
   useVolumeCapture(() => {

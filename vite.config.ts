@@ -42,7 +42,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
+      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'sounds/ShutterSound.mp3'],
       manifest: {
         name: 'Disposable Phone Camera',
         short_name: 'DispoCam',
@@ -74,7 +74,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,mp3}'],
         runtimeCaching: [],
       },
     }),
