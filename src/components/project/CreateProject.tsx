@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
-import type { Project, AspectRatio, ColorProfile } from '../../types';
+import { CAMERAS, getCamera } from '../../lib/cameras';
+import type { Project, AspectRatio, ColorProfile, ProjectMode } from '../../types';
 
 const POSE_OPTIONS = [12, 24, 36];
 
@@ -48,9 +49,15 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const addProject = useStore((s) => s.addProject);
   const projectCount = useStore((s) => s.projects.length);
 
+  // Mode de création : simple (caméra simulée) par défaut, ou "control freak".
+  const [mode, setMode] = useState<ProjectMode>('simple');
+  const [cameraId, setCameraId] = useState<string>(CAMERAS[0].id);
+
+  // Réglages libres (utilisés uniquement en mode "control").
   const [colorProfile, setColorProfile] = useState<ColorProfile>('kodak-gold');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('3:2');
   const [maxPoses, setMaxPoses] = useState(24);
+
   const [takingMinutes, setTakingMinutes] = useState(0);
   const [takingCustomH, setTakingCustomH] = useState('1');
   const [takingCustomM, setTakingCustomM] = useState('0');
@@ -58,7 +65,20 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const [devCustomH, setDevCustomH] = useState('3');
   const [devCustomM, setDevCustomM] = useState('0');
 
-  const name = `Pellicule ${projectCount + 1}`;
+  const camera = useMemo(() => getCamera(cameraId), [cameraId]);
+
+  // Valeurs résolues selon le mode.
+  const resolvedProfile: ColorProfile =
+    mode === 'simple' && camera ? camera.colorProfile : colorProfile;
+  const resolvedRatio: AspectRatio =
+    mode === 'simple' && camera ? camera.aspectRatio : aspectRatio;
+  const resolvedPoses: number =
+    mode === 'simple' && camera ? camera.exposures : maxPoses;
+
+  const name =
+    mode === 'simple' && camera
+      ? `${camera.label} ${projectCount + 1}`
+      : `Pellicule ${projectCount + 1}`;
 
   const handleCreate = useCallback(async () => {
     const now = Date.now();
@@ -82,9 +102,11 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
     const project: Project = {
       id: `project-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name,
-      colorProfile,
-      aspectRatio,
-      maxPoses,
+      mode,
+      cameraId: mode === 'simple' ? cameraId : null,
+      colorProfile: resolvedProfile,
+      aspectRatio: resolvedRatio,
+      maxPoses: resolvedPoses,
       photos: [],
       takingDeadline,
       unlockAt,
@@ -95,6 +117,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
     await db.projects.put({
       id: project.id,
       name: project.name,
+      mode: project.mode,
+      cameraId: project.cameraId,
       colorProfile: project.colorProfile,
       aspectRatio: project.aspectRatio,
       maxPoses: project.maxPoses,
@@ -106,7 +130,18 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
 
     addProject(project);
     onCreated();
-  }, [name, colorProfile, aspectRatio, maxPoses, takingMinutes, devOption, addProject, onCreated]);
+  }, [
+    name,
+    mode,
+    cameraId,
+    resolvedProfile,
+    resolvedRatio,
+    resolvedPoses,
+    takingMinutes,
+    devOption,
+    addProject,
+    onCreated,
+  ]);
 
   const handleQuickDev = (opt: (typeof DEV_QUICK)[number]) => {
     setDevOption(opt);
@@ -143,7 +178,93 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
           <p className="text-vintage-text font-display">{name}</p>
 </div>
 
-        {/* Choix du film (LUT) */}
+        {/* Sélecteur de mode */}
+        <div>
+          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Mode</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setMode('simple')}
+              className={`p-3 rounded-xl border-2 text-left transition-all ${
+                mode === 'simple'
+                  ? 'border-vintage-accent bg-vintage-accent/10'
+                  : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
+              }`}
+            >
+              <p className="font-display text-vintage-text text-sm">📷 Simple</p>
+              <p className="text-xs text-vintage-muted">Choisir une caméra</p>
+            </button>
+            <button
+              onClick={() => setMode('control')}
+              className={`p-3 rounded-xl border-2 text-left transition-all ${
+                mode === 'control'
+                  ? 'border-vintage-accent bg-vintage-accent/10'
+                  : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
+              }`}
+            >
+              <p className="font-display text-vintage-text text-sm">🎛️ Control freak</p>
+              <p className="text-xs text-vintage-muted">Tout régler soi-même</p>
+            </button>
+          </div>
+        </div>
+
+        {mode === 'simple' ? (
+          <>
+            {/* Choix de la caméra (mode simple) */}
+            <div>
+              <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
+                Caméra rétro / jetable
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {CAMERAS.map((cam) => (
+                  <button
+                    key={cam.id}
+                    onClick={() => setCameraId(cam.id)}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      cameraId === cam.id
+                        ? 'border-vintage-accent bg-vintage-accent/10'
+                        : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <span className="text-2xl">{cam.emoji}</span>
+                      {cameraId === cam.id && <span className="text-vintage-accent">✓</span>}
+                    </div>
+                    <p className="font-display text-vintage-text text-sm mt-1">{cam.label}</p>
+                    <p className="text-[11px] text-vintage-muted font-mono mt-0.5">{cam.specs}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Récapitulatif imposé par la caméra */}
+            {camera && (
+              <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20 space-y-1.5">
+                <p className="text-xs font-mono text-vintage-muted uppercase tracking-wider">
+                  Réglages de la caméra
+                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-vintage-muted font-mono text-xs w-14">Film</span>
+                  <span className="text-vintage-text">
+                    {PROFILES[camera.colorProfile].emoji} {PROFILES[camera.colorProfile].label}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-vintage-muted font-mono text-xs w-14">Ratio</span>
+                  <span className="text-vintage-text">{camera.aspectRatio}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-vintage-muted font-mono text-xs w-14">Poses</span>
+                  <span className="text-vintage-text">{camera.exposures}</span>
+                </div>
+                <p className="text-xs text-vintage-muted pt-1">
+                  Le ratio et le film suivent la vraie caméra — non modifiables ici.
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Choix du film (LUT) — mode control */}
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Film (LUT)</p>
           <div className="space-y-2">
@@ -210,6 +331,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
             ))}
           </div>
         </div>
+          </>
+        )}
 {/* Fenêtre de prise de vue */}
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
+import { getCamera } from '../../lib/cameras';
 
 interface ProjectListProps {
   onSelectProject: () => void;
@@ -71,6 +72,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
           <div className="space-y-3">
             {projects.map((project) => {
               const profile = PROFILES[project.colorProfile];
+              const camera = getCamera(project.cameraId);
               const isActive = project.id === currentProjectId;
               const photosCount = project.photos.length;
 
@@ -87,7 +89,9 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
                     <div>
                       <h3 className="font-display text-vintage-text text-sm">{project.name}</h3>
                       <p className="text-xs text-vintage-muted font-mono">
-                        {profile.emoji} {profile.label} · {project.aspectRatio}
+                        {project.mode === 'simple' && camera
+                          ? `${camera.emoji} ${camera.label} · ${project.aspectRatio}`
+                          : `${profile.emoji} ${profile.label} · ${project.aspectRatio}`}
                       </p>
                     </div>
                     <span className="text-xs font-mono text-vintage-muted">

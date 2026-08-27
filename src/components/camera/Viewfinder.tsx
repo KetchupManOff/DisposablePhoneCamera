@@ -7,6 +7,7 @@ import { FilmCounter } from './FilmCounter';
 import { useColorProfile } from '../../hooks/useColorProfile';
 import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 import { useLockTimer } from '../../hooks/useLockTimer';
+import { getCamera } from '../../lib/cameras';
 
 interface ViewfinderProps {
   onOpenRollSelector: () => void;
@@ -120,6 +121,7 @@ export function Viewfinder({
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const { currentProfile } = useColorProfile();
+  const camera = getCamera(currentProject?.cameraId ?? null);
   const [flash, setFlash] = useState(false);
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
@@ -219,7 +221,9 @@ export function Viewfinder({
               className="h-9 max-w-[96px] px-2 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 text-[11px] font-mono text-vintage-text hover:border-vintage-accent/60 transition-colors flex items-center whitespace-nowrap overflow-hidden shrink-0"
             >
               <span className="truncate">
-                {currentProfile?.emoji ?? '🎞️'} {currentProfile?.label ?? 'Film'}
+                {currentProject?.mode === 'simple' && camera
+                  ? `${camera.emoji} ${camera.label}`
+                  : `${currentProfile?.emoji ?? '🎞️'} ${currentProfile?.label ?? 'Film'}`}
               </span>
             </button>
 

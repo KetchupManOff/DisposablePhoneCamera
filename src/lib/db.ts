@@ -13,6 +13,8 @@ export interface StoredPhoto {
 export interface StoredProject {
   id: string;
   name: string;
+  mode: string;
+  cameraId: string | null;
   colorProfile: string;
   aspectRatio: string;
   maxPoses: number;
