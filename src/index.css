@@ -106,7 +106,10 @@ body,
 /* --- Polaroid frame (Lightbox full-view) --- */
 .polaroid-frame {
   background: #fafaf5;
-  padding: 3vmin 3vmin 7vmin 3vmin;
+  /* Symmetric padding: the in-app frame is purely decorative.
+     The real orientation-aware Polaroid border is baked into the
+     exported JPEG by addPolaroidBorder(). */
+  padding: 3vmin;
   border-radius: 2px;
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.15),

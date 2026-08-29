@@ -202,10 +202,14 @@ export function captureFrame(
 /**
  * Adds a Polaroid-style white border to an image data URL.
  * The original photo stays intact — the border is rendered onto a new canvas.
- * 
+ *
+ * The paper is a physical rectangle that doesn't rotate:
+ *   - Portrait images: wider border at the bottom (classic Polaroid look)
+ *   - Landscape images: wider border on the right side (paper turned sideways)
+ *
  * Proportions:
- *   - Top / Left / Right borders: 8% of the shortest image side
- *   - Bottom border: 20% of the shortest image side (classic Polaroid bottom-heavy look)
+ *   - Thin borders: 8% of the shortest image side
+ *   - Thick border: 20% of the shortest image side
  *   - White (#fafaf5) background with a very subtle warm tint
  */
 export function addPolaroidBorder(dataUrl: string): Promise<string> {
@@ -216,11 +220,19 @@ export function addPolaroidBorder(dataUrl: string): Promise<string> {
       const imgH = img.naturalHeight;
       const minSide = Math.min(imgW, imgH);
 
-      const border = Math.round(minSide * 0.08);
-      const bottomBorder = Math.round(minSide * 0.20);
+      const thinBorder = Math.round(minSide * 0.08);
+      const thickBorder = Math.round(minSide * 0.20);
 
-      const canvasW = imgW + border * 2;
-      const canvasH = imgH + border + bottomBorder;
+      const isPortrait = imgH > imgW;
+
+      // Canvas dimensions: paper doesn't rotate, so the thick side
+      // is at the bottom (portrait) or on the right (landscape).
+      const canvasW = isPortrait
+        ? imgW + thinBorder * 2            // thin left + thin right
+        : imgW + thinBorder + thickBorder; // thin left + thick right
+      const canvasH = isPortrait
+        ? imgH + thinBorder + thickBorder  // thin top + thick bottom
+        : imgH + thinBorder * 2;           // thin top + thin bottom
 
       const canvas = document.createElement('canvas');
       canvas.width = canvasW;
@@ -231,10 +243,8 @@ export function addPolaroidBorder(dataUrl: string): Promise<string> {
       ctx.fillStyle = '#fafaf5';
       ctx.fillRect(0, 0, canvasW, canvasH);
 
-      // Optional: very subtle shadow to give depth (only visible against
-      // a non-white background — harmless on save since we use JPEG white bg)
-      // Draw the photo centered with top/left/right borders equal
-      ctx.drawImage(img, border, border, imgW, imgH);
+      // Draw the image anchored at top-left with thin borders on top and left
+      ctx.drawImage(img, thinBorder, thinBorder, imgW, imgH);
 
       resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
