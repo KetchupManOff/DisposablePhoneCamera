@@ -12,6 +12,7 @@ import { useLockTimer } from '../../hooks/useLockTimer';
 import { useShutterSound } from '../../hooks/useShutterSound';
 import { getCamera } from '../../lib/cameras';
 import { getEffectiveRatio, getRatioLabel } from '../../lib/ratio';
+import { useI18n } from '../../i18n/useI18n';
 import type { AspectRatio, Orientation } from '../../types';
 
 interface ViewfinderProps {
@@ -133,6 +134,7 @@ export function Viewfinder({
   onOpenGallery,
   onOpenAbout,
 }: ViewfinderProps) {
+  const { t } = useI18n();
   const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
@@ -243,7 +245,7 @@ export function Viewfinder({
               <button
                 onClick={onOpenGallery}
                 className="relative w-9 h-9 shrink-0 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-                aria-label="Voir le rouleau"
+                aria-label={t('viewfinder.viewRoll')}
               >
                 🎞️
                 {photosCount > 0 && (
@@ -260,7 +262,7 @@ export function Viewfinder({
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               {isTakingWindowOver && !isLocked && (
                 <div className="px-3 py-1 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40 text-[11px] font-mono text-red-400 whitespace-nowrap">
-                  ⏰ Temps écoulé
+                  {t('viewfinder.timeUp')}
                 </div>
               )}
               {isLocked && timeRemaining && (
@@ -304,7 +306,9 @@ export function Viewfinder({
           {(isFull || !canTakePhotos) && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-vintage-danger/20 backdrop-blur-sm border border-vintage-danger/40">
               <p className="text-xs font-mono text-red-400 text-center">
-                {isFull ? `Rouleau plein — ${currentProject?.maxPoses ?? '?'}/${currentProject?.maxPoses ?? '?'} 📸` : '⏰ Fenêtre de prise de vue terminée'}
+                {isFull
+                  ? t('viewfinder.rollFull', { max: currentProject?.maxPoses ?? '?' })
+                  : t('viewfinder.shootingOver')}
               </p>
             </div>
           )}
@@ -314,7 +318,7 @@ export function Viewfinder({
             <div className="absolute inset-0 flex items-center justify-center bg-vintage-bg/80 z-20">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-8 h-8 border-2 border-vintage-accent border-t-transparent rounded-full animate-spin" />
-                <p className="text-vintage-muted text-sm font-mono">Chargement...</p>
+                <p className="text-vintage-muted text-sm font-mono">{t('viewfinder.loading')}</p>
               </div>
             </div>
           )}
@@ -332,14 +336,20 @@ export function Viewfinder({
       </div>
 
       {/* === PANNEAU DE CONTRÔLES (bas en portrait, droite en paysage) === */}
+      {/* 2026-08-29 — Relocalisation de la molette en paysage.
+        IMPORTANT — En paysage physique (iPhone horizontal), le panneau est une
+        colonne sur le côté droit. Si la molette d'armement est en haut, elle se
+        retrouve dans l'angle SUPÉRIEUR DROIT, exactement là où iOS déclenche le
+        « Centre de contrôle » (glissement depuis le coin) → impossible de armer.
+        En paysage on inverse donc la colonne (flex-col-reverse) pour que la
+        molette soit EN BAS. En portrait (flex-row) l'ordre reste inchangé.
+
+        NB : le padding bas est aussi renforcé en paysage (2.5rem) pour garder
+        la molette hors de portée du geste « Accueil » (glissement depuis le
+        bord inférieur de l'écran).
+      */}
       <div
-        className="shrink-0 z-30 flex flex-row landscape:flex-col items-center justify-between landscape:justify-center gap-3 border-t landscape:border-t-0 landscape:border-l border-vintage-border/40 bg-black/40 backdrop-blur-sm"
-        style={{
-          paddingTop: '16px',
-          paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-          paddingRight: 'calc(env(safe-area-inset-right, 0px) + 16px)',
-        }}
+        className="shrink-0 z-30 flex flex-row landscape:flex-col-reverse items-center justify-between landscape:justify-center gap-3 border-t landscape:border-t-0 landscape:border-l border-vintage-border/40 bg-black/40 backdrop-blur-sm pt-4 pl-[calc(env(safe-area-inset-left,0px)+1rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] landscape:pb-[calc(env(safe-area-inset-bottom,0px)+2.5rem)] pr-[calc(env(safe-area-inset-right,0px)+1rem)]"
       >
         {/* Molette d'armement */}
         {canTakePhotos && (
@@ -363,22 +373,22 @@ export function Viewfinder({
           <button
             onClick={switchCamera}
             className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-            aria-label="Changer de caméra"
-            title={facingMode === 'environment' ? 'Caméra arrière (dos)' : 'Caméra avant (selfie)'}
+            aria-label={t('viewfinder.switchCamera')}
+            title={facingMode === 'environment' ? t('viewfinder.backCamera') : t('viewfinder.frontCamera')}
           >
             {facingMode === 'environment' ? '🎥' : '🤳'}
           </button>
           <button
             onClick={onOpenTimerSettings}
             className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-            aria-label="Minuteur de développement"
+            aria-label={t('viewfinder.timer')}
           >
             ⏳
           </button>
           <button
             onClick={onOpenAbout}
             className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"
-            aria-label="À propos"
+            aria-label={t('viewfinder.about')}
           >
             ⓘ
           </button>

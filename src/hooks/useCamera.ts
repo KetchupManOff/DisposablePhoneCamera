@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useStore } from '../store/useStore';
+import { translate } from '../i18n/translations';
 
 type FacingMode = 'user' | 'environment';
 
@@ -29,6 +31,7 @@ interface UseCameraReturn {
 
 export function useCamera(): UseCameraReturn {
   const videoRef = useRef<HTMLVideoElement>(null!);
+  const language = useStore((s) => s.language);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,10 +55,7 @@ export function useCamera(): UseCameraReturn {
 
     // Contexte non-sécurisé : pas de caméra possible (iOS/Safari l'exigent)
     if (!window.isSecureContext || typeof navigator.mediaDevices?.getUserMedia !== 'function') {
-      setError(
-        'L\'appareil photo nécessite une connexion sécurisée (https). ' +
-          'Ouvrez l\'app en https:// depuis votre téléphone (ou en "http://localhost" sur un ordinateur).',
-      );
+      setError(translate(language, 'cameraError.secureContext'));
       setIsLoading(false);
       setIsReady(false);
       return;
@@ -119,21 +119,21 @@ export function useCamera(): UseCameraReturn {
       const message =
         err instanceof DOMException
           ? err.name === 'NotAllowedError'
-            ? "Permission caméra refusée. Autorisez l'accès dans les paramètres."
+            ? translate(language, 'cameraError.permission')
             : err.name === 'NotFoundError'
-              ? 'Aucune caméra détectée.'
+              ? translate(language, 'cameraError.noDevice')
               : err.name === 'OverconstrainedError'
-                ? 'Caméra introuvable avec les réglages demandés.'
+                ? translate(language, 'cameraError.constraints')
                 : err.message
           : err instanceof Error
             ? err.message
-            : 'Erreur inconnue lors de l\'accès à la caméra.';
+            : translate(language, 'cameraError.unknown');
       setError(message);
       setIsReady(false);
     } finally {
       setIsLoading(false);
     }
-  }, [stopCamera]);
+  }, [stopCamera, language]);
 
   const switchCamera = useCallback(() => {
     const next = facingMode === 'environment' ? 'user' : 'environment';

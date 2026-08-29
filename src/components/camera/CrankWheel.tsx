@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { crankTick, crankComplete, primeCrankHaptics } from '../../lib/haptics';
+import { useI18n } from '../../i18n/useI18n';
 
 /** Angle entre deux détentes successives de la molette. */
 const DEG_PER_DETENT = 45;
@@ -23,6 +24,7 @@ function normalizeDelta(delta: number): number {
 
 export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
   const wheelRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
   // Accumulateurs « logiques » (fiables même entre deux rendus React).
   const rotationRef = useRef(0);
@@ -130,11 +132,11 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
       <div
         ref={wheelRef}
         role="slider"
-        aria-label="Molette d'armement du film"
+        aria-label={t('crank.aria')}
         aria-valuemin={0}
         aria-valuemax={DETENTS_TO_COCK}
         aria-valuenow={isCocked ? DETENTS_TO_COCK : detents}
-        aria-valuetext={isCocked ? 'Film armé' : `Armez : ${detents}/${DETENTS_TO_COCK}`}
+        aria-valuetext={isCocked ? t('crank.cocked') : t('crank.armProgress', { detents, total: DETENTS_TO_COCK })}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endDrag}
@@ -215,7 +217,7 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
             : 'text-vintage-muted border-vintage-border/40 bg-black/30'
         }`}
       >
-        {isCocked ? 'Armé ✓' : 'Armez ↻'}
+        {isCocked ? t('crank.armed') : t('crank.arm')}
       </span>
     </div>
   );

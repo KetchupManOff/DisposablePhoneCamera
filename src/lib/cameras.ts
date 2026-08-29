@@ -26,6 +26,8 @@ export interface CameraDefinition {
   manufacturer: string;
   emoji: string;
   description: string;
+  /** Description en anglais. */
+  descriptionEn: string;
   /** Émulsion / LUT appliqué (recherche des caractéristiques réelles) */
   colorProfile: ColorProfile;
   /** Format d'image natif de la caméra réelle */
@@ -34,6 +36,8 @@ export interface CameraDefinition {
   exposures: number;
   /** Résumé technique affiché dans l'UI */
   specs: string;
+  /** Résumé technique en anglais. */
+  specsEn: string;
 }
 
 export const CAMERAS: CameraDefinition[] = [
@@ -43,10 +47,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Fujifilm',
     emoji: '🎞️',
     description: 'Le jetable originel (1986). Fujicolor Superia 400, tons froids.',
+    descriptionEn: 'The original disposable (1986). Fujicolor Superia 400, cool tones.',
     colorProfile: 'fuji-superia',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 400 · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 · 27 exposures · 3:2',
   },
   {
     id: 'kodak-funsaver',
@@ -54,10 +60,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Kodak',
     emoji: '🔥',
     description: 'Kodak Max 800, chaud et punchy — le jetable culte américain.',
+    descriptionEn: 'Kodak Max 800, warm and punchy — the iconic American disposable.',
     colorProfile: 'kodak-ultramax',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 800 · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 800 · 27 exposures · 3:2',
   },
   {
     id: 'lomo-simple-color',
@@ -65,10 +73,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Lomography',
     emoji: '🌈',
     description: 'Color Negative 400, saturation vive et vignettage marqué.',
+    descriptionEn: 'Color Negative 400, vivid saturation and strong vignetting.',
     colorProfile: 'lomo-400',
     aspectRatio: '3:2',
     exposures: 36,
     specs: '35 mm · ISO 400 · 36 poses · 3:2',
+    specsEn: '35 mm · ISO 400 · 36 exposures · 3:2',
   },
   {
     id: 'lomo-simple-bw',
@@ -76,10 +86,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Lomography',
     emoji: '🕶️',
     description: 'Lady Grey 400, noir & blanc doux et contrasté.',
+    descriptionEn: 'Lady Grey 400, soft and contrasty black & white.',
     colorProfile: 'lomo-lady-grey',
     aspectRatio: '3:2',
     exposures: 36,
     specs: '35 mm · ISO 400 N&B · 36 poses · 3:2',
+    specsEn: '35 mm · ISO 400 B&W · 36 exposures · 3:2',
   },
   {
     id: 'ilford-hp5',
@@ -87,10 +99,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Ilford',
     emoji: '🖤',
     description: 'HP5 Plus 400, le N&B classique au grain visible.',
+    descriptionEn: 'HP5 Plus 400, the classic B&W with visible grain.',
     colorProfile: 'bw-hp5',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 400 N&B · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 B&W · 27 exposures · 3:2',
   },
   {
     id: 'ilford-xp2',
@@ -98,10 +112,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Ilford',
     emoji: '🤍',
     description: 'XP2 Super 400, N&B chromogénique fin et doux.',
+    descriptionEn: 'XP2 Super 400, fine and smooth chromogenic B&W.',
     colorProfile: 'bw-xp2',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 400 N&B C41 · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 B&W C41 · 27 exposures · 3:2',
   },
   {
     id: 'agfa-lebox',
@@ -109,10 +125,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'AgfaPhoto',
     emoji: '🔴',
     description: 'Film couleur 400, rendu neutre légèrement chaud.',
+    descriptionEn: 'Color 400 film, neutral render with a slight warmth.',
     colorProfile: 'agfa-vista',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 400 · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 · 27 exposures · 3:2',
   },
   {
     id: 'kodak-tri-x',
@@ -120,10 +138,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Kodak',
     emoji: '🎬',
     description: 'Tri-X 400, N&B très contrasté, grain prononcé.',
+    descriptionEn: 'Tri-X 400, high-contrast B&W with pronounced grain.',
     colorProfile: 'bw-tri-x',
     aspectRatio: '3:2',
     exposures: 27,
     specs: '35 mm · ISO 400 N&B · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 B&W · 27 exposures · 3:2',
   },
   {
     id: 'polaroid-600',
@@ -131,10 +151,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Polaroid',
     emoji: '📸',
     description: 'Instantané carré, pastel et délavé.',
+    descriptionEn: 'Square instant film, pastel and faded.',
     colorProfile: 'polaroid',
     aspectRatio: '1:1',
     exposures: 8,
     specs: 'Instantané · ISO 640 · 8 poses · 1:1',
+    specsEn: 'Instant · ISO 640 · 8 shots · 1:1',
   },
   {
     id: 'instax-mini',
@@ -142,10 +164,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Fujifilm',
     emoji: '🧁',
     description: 'Instantané 62×46 mm, pastel chaud et doux.',
+    descriptionEn: '62×46 mm instant film, warm soft pastel.',
     colorProfile: 'instax-mini',
     aspectRatio: '4:3',
     exposures: 10,
     specs: 'Instantané · ISO 800 · 10 poses · 62×46 mm',
+    specsEn: 'Instant · ISO 800 · 10 shots · 62×46 mm',
   },
   {
     id: 'instax-wide',
@@ -153,10 +177,12 @@ export const CAMERAS: CameraDefinition[] = [
     manufacturer: 'Fujifilm',
     emoji: '🌅',
     description: 'Instantané panoramique 99×62 mm, pastel.',
+    descriptionEn: '99×62 mm panoramic instant film, pastel.',
     colorProfile: 'instax-wide',
     aspectRatio: '3:2',
     exposures: 10,
     specs: 'Instantané · ISO 800 · 10 poses · 99×62 mm',
+    specsEn: 'Instant · ISO 800 · 10 shots · 99×62 mm',
   },
 ];
 

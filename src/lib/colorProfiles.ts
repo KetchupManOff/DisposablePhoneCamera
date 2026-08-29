@@ -5,6 +5,8 @@ export interface ProfileDefinition {
   label: string;
   emoji: string;
   description: string;
+  /** Description en anglais. */
+  descriptionEn: string;
   /** Réglages de courbes RGB appliqués via Canvas */
   filter: {
     brightness: number;  // 0-2, 1 = normal
@@ -22,6 +24,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Kodak Gold 200',
     emoji: '🎞️',
     description: 'Chaud, doré, saturé — l\'icône des années 90',
+    descriptionEn: 'Warm, golden, saturated — the icon of the 90s',
     filter: {
       brightness: 1.05,
       contrast: 1.15,
@@ -36,6 +39,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Kodak UltraMax 800',
     emoji: '🔥',
     description: 'Chaud et punchy, granuleux (ISO 800) — Kodak FunSaver',
+    descriptionEn: 'Warm and punchy, grainy (ISO 800) — Kodak FunSaver',
     filter: {
       brightness: 1.02,
       contrast: 1.2,
@@ -50,6 +54,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Fuji Superia 400',
     emoji: '🌿',
     description: 'Vert profond, tons froids, cyan subtil',
+    descriptionEn: 'Deep greens, cool tones, subtle cyan',
     filter: {
       brightness: 1.0,
       contrast: 1.2,
@@ -64,6 +69,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Lomography 400',
     emoji: '🌈',
     description: 'Très saturé, vignettage marqué, tons chauds',
+    descriptionEn: 'Highly saturated, strong vignetting, warm tones',
     filter: {
       brightness: 1.0,
       contrast: 1.25,
@@ -78,6 +84,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Lady Grey 400',
     emoji: '🕶️',
     description: 'Noir & blanc doux, contraste moyen, vignetté',
+    descriptionEn: 'Soft black & white, medium contrast, vignetted',
     filter: {
       brightness: 1.0,
       contrast: 1.3,
@@ -92,6 +99,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Tri-X 400',
     emoji: '🖤',
     description: 'Noir & blanc contrasté, grain prononcé',
+    descriptionEn: 'High-contrast black & white, pronounced grain',
     filter: {
       brightness: 1.0,
       contrast: 1.5,
@@ -106,6 +114,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Ilford HP5 400',
     emoji: '🎞️',
     description: 'N&B classique, contraste modéré, grain visible',
+    descriptionEn: 'Classic B&W, moderate contrast, visible grain',
     filter: {
       brightness: 1.0,
       contrast: 1.35,
@@ -120,6 +129,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Ilford XP2 400',
     emoji: '🤍',
     description: 'N&B fin et doux (chromogénique C41), grain discret',
+    descriptionEn: 'Fine and smooth B&W (chromogenic C41), subtle grain',
     filter: {
       brightness: 1.02,
       contrast: 1.15,
@@ -134,6 +144,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Agfa Vista 400',
     emoji: '🔴',
     description: 'Couleurs neutres légèrement chaudes — AgfaPhoto LeBox',
+    descriptionEn: 'Neutral colors with a slight warmth — AgfaPhoto LeBox',
     filter: {
       brightness: 1.02,
       contrast: 1.1,
@@ -148,6 +159,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Polaroid 600',
     emoji: '📸',
     description: 'Pastel, doux, légèrement délavé',
+    descriptionEn: 'Pastel, soft, slightly faded',
     filter: {
       brightness: 1.1,
       contrast: 0.85,
@@ -162,6 +174,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Instax Mini',
     emoji: '🧁',
     description: 'Pastel chaud, doux, léger contraste — instantané',
+    descriptionEn: 'Warm pastel, soft, light contrast — instant film',
     filter: {
       brightness: 1.08,
       contrast: 0.9,
@@ -176,6 +189,7 @@ export const PROFILES: Record<ColorProfile, ProfileDefinition> = {
     label: 'Instax Wide',
     emoji: '🌅',
     description: 'Pastel panoramique, contraste doux — instantané',
+    descriptionEn: 'Panoramic pastel, soft contrast — instant film',
     filter: {
       brightness: 1.05,
       contrast: 0.95,

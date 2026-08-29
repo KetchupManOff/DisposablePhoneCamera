@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
+import { translate, type Lang } from '../i18n/translations';
 
 interface UseLockTimerReturn {
   /** Temps restant avant développement (formaté) */
@@ -20,6 +21,7 @@ interface UseLockTimerReturn {
 export function useLockTimer(): UseLockTimerReturn {
   const project = useStore((s) => s.currentProject());
   const unlockCurrentProject = useStore((s) => s.unlockCurrentProject);
+  const language = useStore((s) => s.language);
 
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const [takingTimeRemaining, setTakingTimeRemaining] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export function useLockTimer(): UseLockTimerReturn {
   useEffect(() => {
     if (!project || !project.unlockAt) {
       setTimeRemaining(null);
-      setTakingTimeRemaining(calcTakingTime(project?.takingDeadline ?? null));
+      setTakingTimeRemaining(calcTakingTime(language, project?.takingDeadline ?? null));
       return;
     }
 
@@ -37,7 +39,7 @@ export function useLockTimer(): UseLockTimerReturn {
       // Timer de développement
       const devDiff = project.unlockAt! - now;
       if (devDiff <= 0) {
-        setTimeRemaining('Développement prêt ! 🎉');
+        setTimeRemaining(translate(language, 'lockTimer.developed'));
         if (!project.isUnlocked) {
           unlockCurrentProject();
         }
@@ -45,23 +47,23 @@ export function useLockTimer(): UseLockTimerReturn {
         const hours = Math.floor(devDiff / (1000 * 60 * 60));
         const minutes = Math.floor((devDiff % (1000 * 60 * 60)) / (1000 * 60));
         if (hours > 0) {
-          setTimeRemaining(`${hours}h ${minutes}m`);
+          setTimeRemaining(translate(language, 'lockTimer.hours', { hours, minutes }));
         } else if (minutes > 0) {
-          setTimeRemaining(`${minutes} min`);
+          setTimeRemaining(translate(language, 'lockTimer.minutes', { minutes }));
         } else {
-          setTimeRemaining("Moins d'une minute");
+          setTimeRemaining(translate(language, 'lockTimer.lessThan'));
         }
       }
 
       // Timer de prise de vue
-      setTakingTimeRemaining(calcTakingTime(project.takingDeadline));
+      setTakingTimeRemaining(calcTakingTime(language, project.takingDeadline));
     };
 
     tick();
     const interval = setInterval(tick, 30000);
 
     return () => clearInterval(interval);
-  }, [project?.unlockAt, project?.takingDeadline, project?.isUnlocked, unlockCurrentProject]);
+  }, [project?.unlockAt, project?.takingDeadline, project?.isUnlocked, language, unlockCurrentProject]);
 
   const isLocked = (project?.unlockAt ?? null) !== null && !(project?.isUnlocked ?? true);
   const isExpired = (project?.unlockAt ?? null) !== null && (project?.isUnlocked ?? false);
@@ -78,13 +80,13 @@ export function useLockTimer(): UseLockTimerReturn {
   };
 }
 
-function calcTakingTime(deadline: number | null): string | null {
+function calcTakingTime(language: Lang, deadline: number | null): string | null {
   if (!deadline) return null;
   const diff = deadline - Date.now();
-  if (diff <= 0) return 'Terminé';
+  if (diff <= 0) return translate(language, 'lockTimer.takingFinished');
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `📷 ${hours}h ${minutes}m restantes`;
-  if (minutes > 0) return `📷 ${minutes} min restantes`;
-  return "📷 Moins d'une minute";
+  if (hours > 0) return translate(language, 'lockTimer.takingHours', { hours, minutes });
+  if (minutes > 0) return translate(language, 'lockTimer.takingMinutes', { minutes });
+  return translate(language, 'lockTimer.takingLessThan');
 }

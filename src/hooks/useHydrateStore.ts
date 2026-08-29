@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { db } from '../lib/db';
 import { useStore } from '../store/useStore';
 import type { Project, CapturedPhoto, AspectRatio, Orientation, ColorProfile, ProjectMode } from '../types';
+import type { Lang } from '../i18n/translations';
 
 /**
  * Hydrate le store Zustand depuis IndexedDB au démarrage de l'application.
@@ -10,6 +11,7 @@ export function useHydrateStore(): void {
   const setProjects = useStore((s) => s.setProjects);
   const setCurrentProjectId = useStore((s) => s.setCurrentProjectId);
   const setCurrentProjectPhotos = useStore((s) => s.setCurrentProjectPhotos);
+  const setLanguage = useStore((s) => s.setLanguage);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +71,12 @@ export function useHydrateStore(): void {
             setCurrentProjectId(lastProjectId);
           } else if (projects.length > 0) {
             setCurrentProjectId(projects[0].id);
+          }
+
+          // Restaurer la langue choisie (défaut : français)
+          const storedLang = settingsMap.language as Lang | undefined;
+          if (storedLang === 'fr' || storedLang === 'en') {
+            setLanguage(storedLang);
           }
         }
       } catch (err) {

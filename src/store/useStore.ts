@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { ColorProfile, AspectRatio, Orientation, CapturedPhoto, Project } from '../types';
 import { db } from '../lib/db';
+import type { Lang } from '../i18n/translations';
 
 interface AppState {
   /* --- Projets --- */
@@ -25,6 +26,10 @@ interface AppState {
   /* --- UI --- */
   flashTrigger: number;
   triggerFlash: () => void;
+
+  /* --- Langue --- */
+  language: Lang;
+  setLanguage: (language: Lang) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -138,4 +143,11 @@ export const useStore = create<AppState>((set, get) => ({
 
   flashTrigger: 0,
   triggerFlash: () => set({ flashTrigger: Date.now() }),
+
+  language: 'fr',
+  setLanguage: (language) => {
+    // Persister la langue choisie
+    db.settings.put({ key: 'language', value: language }).catch(() => {});
+    set({ language });
+  },
 }));

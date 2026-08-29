@@ -3,32 +3,35 @@ import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
 import { getCamera } from '../../lib/cameras';
+import { useI18n } from '../../i18n/useI18n';
+import { LanguageToggle } from '../ui/LanguageToggle';
+import type { TFunction } from '../../i18n/translations';
 
 interface ProjectListProps {
   onSelectProject: () => void;
   onCreateNew: () => void;
 }
 
-function formatTimeRemaining(deadline: number | null): string {
-  if (!deadline) return 'Pas de limite';
+function formatTimeRemaining(t: TFunction, deadline: number | null): string {
+  if (!deadline) return t('projects.timeRemaining.noLimit');
   const diff = deadline - Date.now();
-  if (diff <= 0) return 'Terminé';
+  if (diff <= 0) return t('projects.timeRemaining.finished');
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `${hours}h ${minutes}m restantes`;
-  if (minutes > 0) return `${minutes} min restantes`;
-  return "< 1 min";
+  if (hours > 0) return t('projects.timeRemaining.hours', { hours, minutes });
+  if (minutes > 0) return t('projects.timeRemaining.minutes', { minutes });
+  return t('projects.timeRemaining.lessThan');
 }
 
-function formatDevTime(unlockAt: number | null, isUnlocked: boolean): string {
-  if (isUnlocked || !unlockAt) return 'Développé ✓';
+function formatDevTime(t: TFunction, unlockAt: number | null, isUnlocked: boolean): string {
+  if (isUnlocked || !unlockAt) return t('projects.devTime.developed');
   const diff = unlockAt - Date.now();
-  if (diff <= 0) return 'Prêt ! 🎉';
+  if (diff <= 0) return t('projects.devTime.ready');
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `Développement dans ${hours}h ${minutes}m`;
-  if (minutes > 0) return `Développement dans ${minutes}m`;
-  return 'Bientôt...';
+  if (hours > 0) return t('projects.devTime.hours', { hours, minutes });
+  if (minutes > 0) return t('projects.devTime.minutes', { minutes });
+  return t('projects.devTime.soon');
 }
 
 export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) {
@@ -36,6 +39,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
   const currentProjectId = useStore((s) => s.currentProjectId);
   const setCurrentProjectId = useStore((s) => s.setCurrentProjectId);
   const removeProject = useStore((s) => s.removeProject);
+  const { t } = useI18n();
 
   const [, forceUpdate] = useState(0);
   useEffect(() => {
@@ -45,27 +49,30 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg">
-      <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
-        <h2 className="text-lg font-display text-vintage-text">Mes pellicules</h2>
-        <button
-          onClick={onCreateNew}
-          className="px-4 py-2 rounded-full bg-vintage-accent text-black font-mono text-sm hover:bg-vintage-accent/90 transition-all"
-        >
-          + Nouvelle
-        </button>
+      <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30 gap-2">
+        <h2 className="text-lg font-display text-vintage-text">{t('projects.title')}</h2>
+        <div className="flex items-center gap-2 shrink-0">
+          <LanguageToggle />
+          <button
+            onClick={onCreateNew}
+            className="px-4 py-2 rounded-full bg-vintage-accent text-black font-mono text-sm hover:bg-vintage-accent/90 transition-all"
+          >
+            {t('projects.new')}
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         {projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             <p className="text-5xl mb-4">🎞️</p>
-            <p className="text-vintage-muted text-sm mb-2">Aucune pellicule pour le moment.</p>
-            <p className="text-vintage-muted/60 text-xs mb-6">Créez votre première pellicule pour commencer !</p>
+            <p className="text-vintage-muted text-sm mb-2">{t('projects.empty')}</p>
+            <p className="text-vintage-muted/60 text-xs mb-6">{t('projects.emptyHint')}</p>
             <button
               onClick={onCreateNew}
               className="px-6 py-3 rounded-xl bg-vintage-accent text-black font-display hover:bg-vintage-accent/90 transition-all"
             >
-              📸 Créer une pellicule
+              {t('projects.create')}
             </button>
           </div>
         ) : (
@@ -101,11 +108,11 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
 
                   <div className="flex items-center justify-between text-xs font-mono">
                     <span className="text-vintage-muted/70">
-                      {formatDevTime(project.unlockAt, project.isUnlocked)}
+                      {formatDevTime(t, project.unlockAt, project.isUnlocked)}
                     </span>
                     {project.takingDeadline && !project.isUnlocked && (
                       <span className="text-vintage-accent/70">
-                        📷 {formatTimeRemaining(project.takingDeadline)}
+                        📷 {formatTimeRemaining(t, project.takingDeadline)}
                       </span>
                     )}
                   </div>
@@ -119,7 +126,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
                         }}
                         className="flex-1 py-2 rounded-lg border border-vintage-border/40 text-xs font-mono text-vintage-text hover:border-vintage-accent/50 hover:bg-vintage-accent/10 transition-all"
                       >
-                        Ouvrir
+                        {t('projects.open')}
                       </button>
                     )}
                     {isActive && (
@@ -127,7 +134,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
                         onClick={onSelectProject}
                         className="flex-1 py-2 rounded-lg bg-vintage-accent/20 border border-vintage-accent/40 text-xs font-mono text-vintage-accent"
                       >
-                        Actif ✓
+                        {t('projects.active')}
                       </button>
                     )}
                     <button

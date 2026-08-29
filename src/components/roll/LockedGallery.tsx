@@ -5,6 +5,7 @@ import { db } from '../../lib/db';
 import { decrypt } from '../../lib/crypto';
 import { savePhotoToDevice, savePhotosToDevice } from '../../lib/saveToDevice';
 import { addPolaroidBorder } from '../../lib/imageProcessor';
+import { useI18n } from '../../i18n/useI18n';
 
 interface LockedGalleryProps {
   isOpen: boolean;
@@ -32,10 +33,11 @@ function PrintCard({
   const [isSaving, setIsSaving] = useState(false);
   const [isTrashing, setIsTrashing] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const { t, language } = useI18n();
 
   const date = new Date(timestamp);
-  const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const dateStr = date.toLocaleDateString([], { day: 'numeric', month: 'short' });
+  const timeStr = date.toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' });
+  const dateStr = date.toLocaleDateString(language, { day: 'numeric', month: 'short' });
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -43,7 +45,7 @@ function PrintCard({
     try {
       const stored = await db.photos.get(photoId);
       if (!stored) {
-        setSaveError('Photo introuvable');
+        setSaveError(t('gallery.photoNotFound'));
         return;
       }
       const decrypted = decrypt(stored.dataUrl);
@@ -54,11 +56,11 @@ function PrintCard({
         onSave(photoId);
       }
     } catch {
-      setSaveError('Échec de la sauvegarde');
+      setSaveError(t('gallery.saveFailed'));
     } finally {
       setIsSaving(false);
     }
-  }, [photoId, timeStr, dateStr, onSave]);
+  }, [photoId, timeStr, dateStr, onSave, t]);
 
   const handleTrash = useCallback(() => {
     setIsTrashing(true);
@@ -88,14 +90,14 @@ function PrintCard({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-display text-vintage-text">
-          Photo {index + 1} / {total}
+          {t('gallery.photoCount', { index: index + 1, total })}
         </p>
         <p className="text-[11px] font-mono text-vintage-muted">
           {dateStr} · {timeStr}
         </p>
         {saved && (
           <p className="text-[10px] font-mono text-vintage-accent mt-0.5">
-            Enregistrée dans vos photos ✓
+            {t('gallery.saved')}
           </p>
         )}
         {saveError && (
@@ -109,7 +111,7 @@ function PrintCard({
             disabled={isSaving}
             className="px-3 py-1.5 rounded-lg bg-vintage-accent/20 border border-vintage-accent/40 text-vintage-accent text-xs font-mono hover:bg-vintage-accent/30 disabled:opacity-50 transition-all"
           >
-            {isSaving ? '⏳' : '💾 Sauvegarder'}
+            {isSaving ? '⏳' : t('gallery.save')}
           </button>
         )}
         <button
@@ -142,6 +144,7 @@ function Lightbox({
   onDelete: (id: string) => void;
 }) {
   const touchStartX = useRef<number | null>(null);
+  const { t, language } = useI18n();
 
   // Clamp the index when photos are deleted from within the lightbox
   useEffect(() => {
@@ -170,7 +173,7 @@ function Lightbox({
   const photo = photos[index];
   const url = decryptedUrls.get(photo.id);
   const date = new Date(photo.timestamp);
-  const label = `${date.toLocaleDateString([], { day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  const label = `${date.toLocaleDateString(language, { day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
     <div className="absolute inset-0 z-[60] bg-black/95 flex flex-col">
@@ -205,7 +208,7 @@ function Lightbox({
           <div className="polaroid-frame max-h-full max-w-full flex items-center justify-center">
             <img
               src={url}
-              alt={`Photo ${date.toLocaleDateString()}`}
+              alt={`Photo ${date.toLocaleDateString(language)}`}
               className="max-h-[85vh] max-w-[90vw] object-contain rounded-sm"
               draggable={false}
             />
@@ -216,14 +219,14 @@ function Lightbox({
         <button
           onClick={() => onIndexChange((index - 1 + photos.length) % photos.length)}
           className="absolute left-2 sm:left-4 w-9 h-9 rounded-full bg-black/50 border border-vintage-border/40 flex items-center justify-center text-vintage-text hover:border-vintage-accent/60 transition-colors"
-          aria-label="Photo précédente"
+          aria-label={t('gallery.prev')}
         >
           ‹
         </button>
         <button
           onClick={() => onIndexChange((index + 1) % photos.length)}
           className="absolute right-2 sm:right-4 w-9 h-9 rounded-full bg-black/50 border border-vintage-border/40 flex items-center justify-center text-vintage-text hover:border-vintage-accent/60 transition-colors"
-          aria-label="Photo suivante"
+          aria-label={t('gallery.next')}
         >
           ›
         </button>
@@ -237,13 +240,13 @@ function Lightbox({
             onClick={() => onDownload(photo.id)}
             className="px-3 py-2 rounded-lg bg-vintage-accent/20 border border-vintage-accent/40 text-vintage-accent text-xs font-mono hover:bg-vintage-accent/30 transition-all"
           >
-            💾 Enregistrer
+            💾 {t('gallery.saveImage')}
           </button>
           <button
             onClick={() => onDelete(photo.id)}
             className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono hover:bg-red-500/20 transition-all"
           >
-            🗑️ Supprimer
+            🗑️ {t('gallery.delete')}
           </button>
         </div>
       </div>
@@ -269,6 +272,7 @@ function ControlGallery({
   maxPoses: number;
 }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { t, language } = useI18n();
 
   return (
     <>
@@ -288,12 +292,12 @@ function ControlGallery({
           {photos.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <p className="text-5xl mb-4">🎞️</p>
-              <p className="text-vintage-muted text-sm">Aucune photo pour le moment.</p>
+              <p className="text-vintage-muted text-sm">{t('gallery.empty')}</p>
             </div>
           ) : (
             <>
               <p className="text-[10px] font-mono text-vintage-muted mb-3 text-center">
-                Appuyez sur une photo pour la voir en grand
+                {t('gallery.tapToView')}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((photo, i) => {
@@ -357,6 +361,7 @@ function SimpleGallery({
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const savedCount = savedIds.size;
   const allSaved = photos.length > 0 && savedCount === photos.length;
+  const { t, tp } = useI18n();
 
   const handleSave = useCallback((id: string) => {
     setSavedIds((prev) => new Set(prev).add(id));
@@ -381,17 +386,17 @@ function SimpleGallery({
         setSavedIds(new Set(photos.map((p) => p.id)));
       }
     } catch {
-      setDownloadError('Échec du téléchargement. Réessayez.');
+      setDownloadError(t('gallery.prints.downloadError'));
     } finally {
       setIsDownloadingAll(false);
     }
-  }, [photos, isDownloadingAll]);
+  }, [photos, isDownloadingAll, t]);
 
   if (photos.length === 0) {
     return (
       <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
         <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
-          <h2 className="text-lg font-display text-vintage-text">Tirages</h2>
+          <h2 className="text-lg font-display text-vintage-text">{t('gallery.prints.emptyTitle')}</h2>
           <button
             onClick={onClose}
             className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
@@ -401,9 +406,9 @@ function SimpleGallery({
         </div>
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <p className="text-5xl mb-4">📭</p>
-          <p className="text-vintage-muted text-sm">Aucun tirage pour le moment.</p>
+          <p className="text-vintage-muted text-sm">{t('gallery.prints.empty')}</p>
           <p className="text-vintage-muted/60 text-xs mt-2">
-            Prenez votre première photo !
+            {t('gallery.prints.emptyHint')}
           </p>
         </div>
       </div>
@@ -415,9 +420,9 @@ function SimpleGallery({
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
         <div>
-          <h2 className="text-lg font-display text-vintage-text">Vos tirages</h2>
+          <h2 className="text-lg font-display text-vintage-text">{t('gallery.prints.title')}</h2>
           <p className="text-[10px] font-mono text-vintage-muted">
-            {photos.length} tirage{photos.length > 1 ? 's' : ''} · {savedCount} sauvegardé{savedCount > 1 ? 's' : ''}
+            {tp('gallery.prints.count', photos.length)} · {tp('gallery.prints.saved', savedCount)}
           </p>
         </div>
         <button
@@ -431,9 +436,11 @@ function SimpleGallery({
       {/* Guide */}
       <div className="px-4 py-3 border-b border-vintage-border/20 bg-vintage-surface/10">
         <p className="text-xs font-mono text-vintage-muted text-center leading-relaxed">
-          Comme de vrais tirages, vos photos sont masquées.<br />
-          <span className="text-vintage-accent">Téléchargez-les d&apos;un coup</span> dans votre pellicule pour les voir,
-          puis <span className="text-red-400">jetez</span> celles que vous n&apos;aimez pas.
+          {t('gallery.prints.guidePre')}<br />
+          <span className="text-vintage-accent">{t('gallery.prints.guideDownload')}</span>{' '}
+          {t('gallery.prints.guideMid')}{' '}
+          <span className="text-red-400">{t('gallery.prints.guideTrash')}</span>{' '}
+          {t('gallery.prints.guidePost')}
         </p>
       </div>
 
@@ -445,13 +452,13 @@ function SimpleGallery({
           className="w-full py-4 rounded-2xl bg-vintage-accent/90 text-vintage-bg font-display text-base flex items-center justify-center gap-2 hover:bg-vintage-accent disabled:opacity-50 transition-all cursor-pointer"
         >
           {isDownloadingAll
-            ? '⏳ Téléchargement…'
+            ? t('gallery.prints.downloading')
             : allSaved
-              ? '✅ Tout est dans vos photos'
-              : '📥 Tout télécharger dans mes photos'}
+              ? t('gallery.prints.allSaved')
+              : t('gallery.prints.downloadAll')}
         </button>
         <p className="text-[10px] font-mono text-vintage-muted text-center mt-2">
-          Les {photos.length} photos seront exportées en une fois dans votre pellicule photo.
+          {tp('gallery.prints.exportInfo', photos.length)}
         </p>
         {downloadError && (
           <p className="text-[10px] font-mono text-red-400 text-center mt-1">{downloadError}</p>
@@ -492,6 +499,7 @@ function SimpleGallery({
   );
 }
 export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
+  const { t, language } = useI18n();
   const currentProject = useStore((s) => s.currentProject());
   const setCurrentProjectPhotos = useStore((s) => s.setCurrentProjectPhotos);
   const isUnlocked = currentProject?.isUnlocked ?? true;
@@ -552,7 +560,7 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
       <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
         <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
           <h2 className="text-lg font-display text-vintage-text">
-            {currentProject?.name ?? 'Rouleau'}
+            {currentProject?.name ?? t('gallery.rollName')}
           </h2>
           <button
             onClick={onClose}
@@ -564,16 +572,16 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <p className="text-5xl mb-4">🔒</p>
           <p className="text-lg font-display text-vintage-text mb-2">
-            Photos verrouillées
+            {t('gallery.locked')}
           </p>
           <p className="text-sm text-vintage-muted text-center mb-4">
-            Temps restant avant développement :
+            {t('gallery.lockedTime')}
           </p>
           <p className="text-xl font-display text-vintage-accent">
             {timeRemaining}
           </p>
           <p className="text-xs text-vintage-muted mt-6 text-center max-w-xs">
-            Revenez à l&apos;heure du développement pour découvrir vos photos !
+            {t('gallery.lockedHint')}
           </p>
         </div>
       </div>
@@ -589,7 +597,7 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
         onClose={onClose}
         onRemovePhoto={handleRemovePhoto}
         onDownload={handleDownloadPhoto}
-        projectName={currentProject?.name ?? 'Rouleau'}
+        projectName={currentProject?.name ?? t('gallery.rollName')}
         maxPoses={currentProject?.maxPoses ?? 0}
       />
     );

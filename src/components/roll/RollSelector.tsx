@@ -1,4 +1,5 @@
 import { useColorProfile } from '../../hooks/useColorProfile';
+import { useI18n } from '../../i18n/useI18n';
 import type { ColorProfile } from '../../types';
 
 interface RollSelectorProps {
@@ -7,6 +8,7 @@ interface RollSelectorProps {
 }
 
 export function RollSelector({ isOpen, onClose }: RollSelectorProps) {
+  const { t, language } = useI18n();
   const { currentProfile, allProfiles, setProfile } = useColorProfile();
 
   if (!isOpen) return null;
@@ -15,7 +17,7 @@ export function RollSelector({ isOpen, onClose }: RollSelectorProps) {
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
-        <h2 className="text-lg font-display text-vintage-text">Choisir un film</h2>
+        <h2 className="text-lg font-display text-vintage-text">{t('rollSelector.title')}</h2>
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text transition-colors"
@@ -50,7 +52,7 @@ export function RollSelector({ isOpen, onClose }: RollSelectorProps) {
                     {profile.label}
                   </p>
                   <p className="text-xs text-vintage-muted mt-0.5">
-                    {profile.description}
+                    {language === 'en' ? profile.descriptionEn : profile.description}
                   </p>
                 </div>
                 {isSelected && (
@@ -65,7 +67,7 @@ export function RollSelector({ isOpen, onClose }: RollSelectorProps) {
       {/* Footer */}
       <div className="p-4 border-t border-vintage-border/30">
         <p className="text-xs text-vintage-muted text-center font-mono">
-          Le filtre est appliqué à la prise de vue, pas d'aperçu avant développement.
+          {t('rollSelector.footer')}
         </p>
       </div>
     </div>

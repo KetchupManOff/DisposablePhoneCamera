@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useLockTimer } from '../../hooks/useLockTimer';
+import { useI18n } from '../../i18n/useI18n';
 
 interface DevelopmentTimerProps {
   isOpen: boolean;
@@ -8,12 +9,12 @@ interface DevelopmentTimerProps {
 }
 
 const QUICK_OPTIONS = [
-  { label: '1 heure', hours: 1 },
-  { label: '3 heures', hours: 3 },
-  { label: '6 heures', hours: 6 },
-  { label: 'Ce soir 20h', targetHour: 20 },
-  { label: 'Demain 9h', targetHour: 9, nextDay: true },
-  { label: 'Pas de verrou', hours: 0 },
+  { labelKey: 'devTimer.option.1h', hours: 1 },
+  { labelKey: 'devTimer.option.3h', hours: 3 },
+  { labelKey: 'devTimer.option.6h', hours: 6 },
+  { labelKey: 'devTimer.option.tonight', targetHour: 20 },
+  { labelKey: 'devTimer.option.tomorrow', targetHour: 9, nextDay: true },
+  { labelKey: 'devTimer.option.noLock', hours: 0 },
 ];
 
 function getTargetTimestamp(targetHour: number, nextDay = false): number {
@@ -27,6 +28,7 @@ function getTargetTimestamp(targetHour: number, nextDay = false): number {
 }
 
 export function DevelopmentTimer({ isOpen, onClose }: DevelopmentTimerProps) {
+  const { t } = useI18n();
   const currentProject = useStore((s) => s.currentProject());
   const updateCurrentProjectTimer = useStore((s) => s.updateCurrentProjectTimer);
   const { timeRemaining, isLocked, takingTimeRemaining } = useLockTimer();
@@ -72,7 +74,7 @@ export function DevelopmentTimer({ isOpen, onClose }: DevelopmentTimerProps) {
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
       <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
-        <h2 className="text-lg font-display text-vintage-text">Développement</h2>
+        <h2 className="text-lg font-display text-vintage-text">{t('devTimer.title')}</h2>
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
@@ -84,43 +86,43 @@ export function DevelopmentTimer({ isOpen, onClose }: DevelopmentTimerProps) {
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {currentProject && (
           <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20">
-            <p className="text-xs text-vintage-muted font-mono">Pellicule active</p>
+            <p className="text-xs text-vintage-muted font-mono">{t('devTimer.activeRoll')}</p>
             <p className="text-vintage-text font-display text-sm">{currentProject.name}</p>
           </div>
         )}
 
         {isLocked && timeRemaining && (
           <div className="p-4 rounded-xl bg-vintage-accent/10 border border-vintage-accent/30">
-            <p className="text-xs text-vintage-muted font-mono mb-1">Temps restant avant développement</p>
+            <p className="text-xs text-vintage-muted font-mono mb-1">{t('devTimer.remaining')}</p>
             <p className="text-xl font-display text-vintage-accent">{timeRemaining}</p>
             <button
               onClick={handleCancelLock}
               className="mt-3 text-xs text-red-400 underline hover:text-red-300"
             >
-              Annuler le verrouillage
+              {t('devTimer.cancelLock')}
             </button>
           </div>
         )}
 
         {takingTimeRemaining && (
           <div className="p-4 rounded-xl bg-vintage-surface/30 border border-vintage-border/30">
-            <p className="text-xs text-vintage-muted font-mono mb-1">Fenêtre de prise de vue</p>
+            <p className="text-xs text-vintage-muted font-mono mb-1">{t('devTimer.takingWindow')}</p>
             <p className="text-sm font-mono text-vintage-text">{takingTimeRemaining}</p>
           </div>
         )}
 
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
-            Durées rapides
+            {t('devTimer.quick')}
           </p>
           <div className="grid grid-cols-2 gap-2">
             {QUICK_OPTIONS.map((opt) => (
               <button
-                key={opt.label}
+                key={opt.labelKey}
                 onClick={() => handleQuickOption(opt)}
                 className="p-3 rounded-xl border border-vintage-border/40 bg-vintage-surface/20 text-sm text-vintage-text hover:border-vintage-accent/50 hover:bg-vintage-accent/10 transition-all font-mono"
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             ))}
           </div>
@@ -128,7 +130,7 @@ export function DevelopmentTimer({ isOpen, onClose }: DevelopmentTimerProps) {
 
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
-            Délai personnalisé
+            {t('devTimer.custom')}
           </p>
           <div className="flex items-center gap-2">
             <input
@@ -159,7 +161,7 @@ export function DevelopmentTimer({ isOpen, onClose }: DevelopmentTimerProps) {
 
       <div className="p-4 border-t border-vintage-border/30">
         <p className="text-xs text-vintage-muted text-center font-mono">
-          Les photos resteront masquées jusqu'au développement.
+          {t('devTimer.footer')}
         </p>
       </div>
     </div>

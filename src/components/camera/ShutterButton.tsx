@@ -1,3 +1,5 @@
+import { useI18n } from '../../i18n/useI18n';
+
 interface ShutterButtonProps {
   onCapture: () => void;
   disabled?: boolean;
@@ -10,6 +12,7 @@ interface ShutterButtonProps {
  * Grand déclencheur d'obturateur (96 px), plus facile à atteindre.
  */
 export function ShutterButton({ onCapture, disabled, remainingPoses, isCranked }: ShutterButtonProps) {
+  const { t } = useI18n();
   const isEmpty = remainingPoses <= 0;
   const isLocked = isEmpty || !isCranked;
   const isBlocked = disabled || isLocked;
@@ -28,10 +31,10 @@ export function ShutterButton({ onCapture, disabled, remainingPoses, isCranked }
       `}
       aria-label={
         isEmpty
-          ? 'Rouleau vide'
+          ? t('shutter.empty')
           : !isCranked
-            ? 'Armez la molette avant de photographier'
-            : 'Prendre une photo'
+            ? t('shutter.crankFirst')
+            : t('shutter.take')
       }
     >
       {/* Anneau extérieur */}

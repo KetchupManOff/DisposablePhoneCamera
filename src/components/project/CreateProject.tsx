@@ -3,31 +3,32 @@ import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
 import { CAMERAS, getCamera } from '../../lib/cameras';
+import { useI18n } from '../../i18n/useI18n';
 import type { Project, AspectRatio, ColorProfile, ProjectMode } from '../../types';
 
 const POSE_OPTIONS = [12, 24, 36];
 
 const TAKING_QUICK = [
-  { label: '30 minutes', minutes: 30 },
-  { label: '1 heure', minutes: 60 },
-  { label: '2 heures', minutes: 120 },
-  { label: 'Pas de limite', minutes: 0 },
+  { labelKey: 'createProject.taking.30', minutes: 30 },
+  { labelKey: 'createProject.taking.1h', minutes: 60 },
+  { labelKey: 'createProject.taking.2h', minutes: 120 },
+  { labelKey: 'createProject.taking.noLimit', minutes: 0 },
 ];
 
 const DEV_QUICK = [
-  { label: 'Instantané', hours: 0 },
-  { label: '1 heure', hours: 1 },
-  { label: '3 heures', hours: 3 },
-  { label: '6 heures', hours: 6 },
-  { label: 'Ce soir 20h', targetHour: 20 },
-  { label: 'Demain 9h', targetHour: 9, nextDay: true },
+  { labelKey: 'createProject.dev.instant', hours: 0 },
+  { labelKey: 'createProject.dev.1h', hours: 1 },
+  { labelKey: 'createProject.dev.3h', hours: 3 },
+  { labelKey: 'createProject.dev.6h', hours: 6 },
+  { labelKey: 'createProject.dev.tonight', targetHour: 20 },
+  { labelKey: 'createProject.dev.tomorrow', targetHour: 9, nextDay: true },
 ];
 
-const RATIO_OPTIONS: { value: AspectRatio; label: string; desc: string }[] = [
-  { value: '1:1', label: '1:1', desc: 'Carré — style Polaroid' },
-  { value: '3:2', label: '3:2', desc: 'Classique 35 mm' },
-  { value: '4:3', label: '4:3', desc: 'Standard numérique' },
-  { value: '16:9', label: '16:9', desc: 'Cinéma panoramique' },
+const RATIO_OPTIONS: { value: AspectRatio; label: string; descKey: string }[] = [
+  { value: '1:1', label: '1:1', descKey: 'createProject.ratioSquare' },
+  { value: '3:2', label: '3:2', descKey: 'createProject.ratioClassic' },
+  { value: '4:3', label: '4:3', descKey: 'createProject.ratioDigital' },
+  { value: '16:9', label: '16:9', descKey: 'createProject.ratioCinema' },
 ];
 
 function getTargetTimestamp(targetHour: number, nextDay = false): number {
@@ -48,6 +49,7 @@ interface CreateProjectProps {
 export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const addProject = useStore((s) => s.addProject);
   const projectCount = useStore((s) => s.projects.length);
+  const { t, language } = useI18n();
 
   // Mode de création : simple (caméra simulée) par défaut, ou "control freak".
   const [mode, setMode] = useState<ProjectMode>('simple');
@@ -79,7 +81,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const defaultName =
     mode === 'simple' && camera
       ? `${camera.label} ${projectCount + 1}`
-      : `Pellicule ${projectCount + 1}`;
+      : t('createProject.defaultName', { count: projectCount + 1 });
 
   // État du nom personnalisable (pré-rempli avec le nom auto)
   const [projectName, setProjectName] = useState(defaultName);
@@ -176,7 +178,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
     <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30 sticky top-0 bg-vintage-bg z-10">
-        <h2 className="text-lg font-display text-vintage-text">Nouvelle pellicule</h2>
+        <h2 className="text-lg font-display text-vintage-text">{t('createProject.title')}</h2>
         <button
           onClick={onCancel}
           className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
@@ -188,7 +190,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
       <div className="flex-1 p-4 space-y-6 pb-8">
         {/* Nom du projet (éditable) */}
         <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20">
-          <p className="text-xs font-mono text-vintage-muted mb-2">Nom du projet</p>
+          <p className="text-xs font-mono text-vintage-muted mb-2">{t('createProject.name')}</p>
           <input
             type="text"
             value={projectName}
@@ -197,13 +199,13 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
               nameEditedRef.current = true;
             }}
             className="w-full p-2 rounded-lg bg-vintage-surface/60 border border-vintage-border/40 text-vintage-text font-display text-sm focus:border-vintage-accent outline-none placeholder-vintage-muted/50"
-            placeholder="Nom de la pellicule..."
+            placeholder={t('createProject.namePlaceholder')}
           />
         </div>
 
         {/* Sélecteur de mode */}
         <div>
-          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Mode</p>
+          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">{t('createProject.mode')}</p>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setMode('simple')}
@@ -213,8 +215,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                   : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
               }`}
             >
-              <p className="font-display text-vintage-text text-sm">📷 Simple</p>
-              <p className="text-xs text-vintage-muted">Choisir une caméra</p>
+              <p className="font-display text-vintage-text text-sm">{t('createProject.modeSimple')}</p>
+              <p className="text-xs text-vintage-muted">{t('createProject.modeSimpleDesc')}</p>
             </button>
             <button
               onClick={() => setMode('control')}
@@ -224,8 +226,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                   : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
               }`}
             >
-              <p className="font-display text-vintage-text text-sm">🎛️ Control freak</p>
-              <p className="text-xs text-vintage-muted">Tout régler soi-même</p>
+              <p className="font-display text-vintage-text text-sm">{t('createProject.modeControl')}</p>
+              <p className="text-xs text-vintage-muted">{t('createProject.modeControlDesc')}</p>
             </button>
           </div>
         </div>
@@ -235,7 +237,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
             {/* Choix de la caméra (mode simple) */}
             <div>
               <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
-                Caméra rétro / jetable
+                {t('createProject.cameraSection')}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {CAMERAS.map((cam) => (
@@ -253,7 +255,9 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                       {cameraId === cam.id && <span className="text-vintage-accent">✓</span>}
                     </div>
                     <p className="font-display text-vintage-text text-sm mt-1">{cam.label}</p>
-                    <p className="text-[11px] text-vintage-muted font-mono mt-0.5">{cam.specs}</p>
+                    <p className="text-[11px] text-vintage-muted font-mono mt-0.5">
+                      {language === 'en' ? cam.specsEn : cam.specs}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -263,24 +267,24 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
             {camera && (
               <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20 space-y-1.5">
                 <p className="text-xs font-mono text-vintage-muted uppercase tracking-wider">
-                  Réglages de la caméra
+                  {t('createProject.cameraSettings')}
                 </p>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-vintage-muted font-mono text-xs w-14">Film</span>
+                  <span className="text-vintage-muted font-mono text-xs w-14">{t('createProject.film')}</span>
                   <span className="text-vintage-text">
                     {PROFILES[camera.colorProfile].emoji} {PROFILES[camera.colorProfile].label}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-vintage-muted font-mono text-xs w-14">Ratio</span>
+                  <span className="text-vintage-muted font-mono text-xs w-14">{t('createProject.ratio')}</span>
                   <span className="text-vintage-text">{camera.aspectRatio}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-vintage-muted font-mono text-xs w-14">Poses</span>
+                  <span className="text-vintage-muted font-mono text-xs w-14">{t('createProject.poses')}</span>
                   <span className="text-vintage-text">{camera.exposures}</span>
                 </div>
                 <p className="text-xs text-vintage-muted pt-1">
-                  Le ratio et le film suivent la vraie caméra — non modifiables ici.
+                  {t('createProject.fixedByCamera')}
                 </p>
               </div>
             )}
@@ -289,7 +293,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
           <>
             {/* Choix du film (LUT) — mode control */}
         <div>
-          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Film (LUT)</p>
+          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">{t('createProject.filmLut')}</p>
           <div className="space-y-2">
             {Object.values(PROFILES).map((profile) => (
               <button
@@ -305,7 +309,9 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                   <span className="text-xl">{profile.emoji}</span>
                   <div>
                     <p className="font-display text-vintage-text text-sm">{profile.label}</p>
-                    <p className="text-xs text-vintage-muted">{profile.description}</p>
+                    <p className="text-xs text-vintage-muted">
+                      {language === 'en' ? profile.descriptionEn : profile.description}
+                    </p>
                   </div>
                   {colorProfile === profile.id && (<span className="ml-auto text-vintage-accent">✓</span>)}
                 </div>
@@ -316,7 +322,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
 
         {/* Ratio */}
         <div>
-          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Ratio</p>
+          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">{t('createProject.ratio')}</p>
           <div className="grid grid-cols-2 gap-2">
             {RATIO_OPTIONS.map((r) => (
               <button
@@ -329,7 +335,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                 }`}
               >
                 <p className="font-display text-vintage-text">{r.label}</p>
-                <p className="text-xs text-vintage-muted">{r.desc}</p>
+                <p className="text-xs text-vintage-muted">{t(r.descKey)}</p>
               </button>
             ))}
           </div>
@@ -337,7 +343,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
 
         {/* Nombre de poses */}
         <div>
-          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">Nombre de poses</p>
+          <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">{t('createProject.posesCount')}</p>
           <div className="flex gap-2">
             {POSE_OPTIONS.map((n) => (
               <button
@@ -359,12 +365,12 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
 {/* Fenêtre de prise de vue */}
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
-            ⏱ Temps pour prendre les photos
+            {t('createProject.takingWindow')}
           </p>
           <div className="grid grid-cols-2 gap-2 mb-2">
             {TAKING_QUICK.map((opt) => (
               <button
-                key={opt.label}
+                key={opt.labelKey}
                 onClick={() => setTakingMinutes(opt.minutes)}
                 className={`p-3 rounded-xl border text-sm transition-all font-mono ${
                   takingMinutes === opt.minutes
@@ -372,12 +378,12 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                     : 'border-vintage-border/40 bg-vintage-surface/20 text-vintage-text hover:border-vintage-border/60'
                 }`}
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-vintage-muted font-mono">Personnalisé :</span>
+            <span className="text-xs text-vintage-muted font-mono">{t('createProject.custom')}</span>
             <input type="number" min="0" max="72" value={takingCustomH}
               onChange={(e) => { setTakingCustomH(e.target.value); const h = parseInt(e.target.value,10)||0; const m = parseInt(takingCustomM,10)||0; setTakingMinutes(h*60+m); }}
               className="w-14 p-2 rounded-lg bg-vintage-surface/50 border border-vintage-border/40 text-center text-vintage-text font-mono text-sm focus:border-vintage-accent outline-none" />
@@ -392,12 +398,12 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
         {/* Délai de développement */}
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
-            🧪 Développement (quand les photos seront visibles)
+            {t('createProject.development')}
           </p>
           <div className="grid grid-cols-2 gap-2 mb-2">
             {DEV_QUICK.map((opt) => (
               <button
-                key={opt.label}
+                key={opt.labelKey}
                 onClick={() => handleQuickDev(opt)}
                 className={`p-3 rounded-xl border text-sm transition-all font-mono ${
                   devOption &&
@@ -407,12 +413,12 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
                     : 'border-vintage-border/40 bg-vintage-surface/20 text-vintage-text hover:border-vintage-border/60'
                 }`}
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-vintage-muted font-mono">Personnalisé :</span>
+            <span className="text-xs text-vintage-muted font-mono">{t('createProject.custom')}</span>
             <input type="number" min="0" max="168" value={devCustomH}
               onChange={(e) => setDevCustomH(e.target.value)}
               className="w-14 p-2 rounded-lg bg-vintage-surface/50 border border-vintage-border/40 text-center text-vintage-text font-mono text-sm focus:border-vintage-accent outline-none" />
@@ -440,7 +446,7 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
               : 'bg-vintage-border/40 text-vintage-muted cursor-not-allowed'
           }`}
         >
-          📸 Créer la pellicule
+          {t('createProject.create')}
         </button>
       </div>
     </div>
