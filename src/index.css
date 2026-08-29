@@ -102,3 +102,22 @@ body,
 .pt-safe-6 {
   padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
 }
+
+/* --- Polaroid frame (Lightbox full-view) --- */
+.polaroid-frame {
+  background: #fafaf5;
+  padding: 3vmin 3vmin 7vmin 3vmin;
+  border-radius: 2px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+}
+
+/* --- Polaroid thumb (Gallery grid) --- */
+.polaroid-thumb-inner {
+  transition: transform 0.2s ease;
+}
+.polaroid-thumb:hover .polaroid-thumb-inner {
+  transform: scale(1.02);
+}

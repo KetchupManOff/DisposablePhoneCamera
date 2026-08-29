@@ -198,3 +198,47 @@ export function captureFrame(
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
   return canvas;
 }
+
+/**
+ * Adds a Polaroid-style white border to an image data URL.
+ * The original photo stays intact — the border is rendered onto a new canvas.
+ * 
+ * Proportions:
+ *   - Top / Left / Right borders: 8% of the shortest image side
+ *   - Bottom border: 20% of the shortest image side (classic Polaroid bottom-heavy look)
+ *   - White (#fafaf5) background with a very subtle warm tint
+ */
+export function addPolaroidBorder(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+      const minSide = Math.min(imgW, imgH);
+
+      const border = Math.round(minSide * 0.08);
+      const bottomBorder = Math.round(minSide * 0.20);
+
+      const canvasW = imgW + border * 2;
+      const canvasH = imgH + border + bottomBorder;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasW;
+      canvas.height = canvasH;
+      const ctx = canvas.getContext('2d')!;
+
+      // White background (slightly warm, like real Polaroid paper)
+      ctx.fillStyle = '#fafaf5';
+      ctx.fillRect(0, 0, canvasW, canvasH);
+
+      // Optional: very subtle shadow to give depth (only visible against
+      // a non-white background — harmless on save since we use JPEG white bg)
+      // Draw the photo centered with top/left/right borders equal
+      ctx.drawImage(img, border, border, imgW, imgH);
+
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
+    };
+    img.onerror = () => reject(new Error('Failed to load image for polaroid border'));
+    img.src = dataUrl;
+  });
+}

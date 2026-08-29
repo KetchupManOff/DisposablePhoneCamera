@@ -4,6 +4,7 @@ import { useLockTimer } from '../../hooks/useLockTimer';
 import { db } from '../../lib/db';
 import { decrypt } from '../../lib/crypto';
 import { savePhotoToDevice, savePhotosToDevice } from '../../lib/saveToDevice';
+import { addPolaroidBorder } from '../../lib/imageProcessor';
 
 interface LockedGalleryProps {
   isOpen: boolean;
@@ -46,8 +47,9 @@ function PrintCard({
         return;
       }
       const decrypted = decrypt(stored.dataUrl);
+      const polaroid = await addPolaroidBorder(decrypted);
       const filename = `DispoCam-${dateStr.replace(' ', '-')}-${timeStr.replace(':', 'h')}.jpg`;
-      const success = await savePhotoToDevice(decrypted, filename);
+      const success = await savePhotoToDevice(polaroid, filename);
       if (success) {
         onSave(photoId);
       }
@@ -200,12 +202,14 @@ function Lightbox({
         }}
       >
         {url ? (
-          <img
-            src={url}
-            alt={`Photo ${date.toLocaleDateString()}`}
-            className="max-h-full max-w-full object-contain"
-            draggable={false}
-          />
+          <div className="polaroid-frame max-h-full max-w-full flex items-center justify-center">
+            <img
+              src={url}
+              alt={`Photo ${date.toLocaleDateString()}`}
+              className="max-h-[85vh] max-w-[90vw] object-contain rounded-sm"
+              draggable={false}
+            />
+          </div>
         ) : (
           <div className="text-vintage-muted/50 text-xl">🎞️</div>
         )}
@@ -298,18 +302,20 @@ function ControlGallery({
                     <button
                       key={photo.id}
                       onClick={() => setSelectedIndex(i)}
-                      className="aspect-square rounded-lg overflow-hidden bg-vintage-surface/50 border border-vintage-border/30 group relative"
+                      className="polaroid-thumb group relative flex flex-col items-center"
                     >
                       {url ? (
-                        <img
-                          src={url}
-                          alt={`Photo ${photo.id}`}
-                          className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
-                          loading="lazy"
-                          draggable={false}
-                        />
+                        <div className="polaroid-thumb-inner bg-[#fafaf5] p-[6%] pb-[14%] rounded-sm shadow-md w-full">
+                          <img
+                            src={url}
+                            alt={`Photo ${photo.id}`}
+                            className="w-full aspect-square object-cover rounded-[1px] group-hover:opacity-80 transition-opacity"
+                            loading="lazy"
+                            draggable={false}
+                          />
+                        </div>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-vintage-muted/40">
+                        <div className="w-full aspect-square flex items-center justify-center text-vintage-muted/40 bg-vintage-surface/50 rounded-lg border border-vintage-border/30">
                           🎞️
                         </div>
                       )}
@@ -365,7 +371,9 @@ function SimpleGallery({
       for (let i = 0; i < photos.length; i++) {
         const stored = await db.photos.get(photos[i].id);
         if (stored) {
-          items.push({ dataUrl: decrypt(stored.dataUrl), filename: `DispoCam-${i + 1}.jpg` });
+          const decrypted = decrypt(stored.dataUrl);
+          const polaroid = await addPolaroidBorder(decrypted);
+          items.push({ dataUrl: polaroid, filename: `DispoCam-${i + 1}.jpg` });
         }
       }
       const ok = await savePhotosToDevice(items);
@@ -531,7 +539,9 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
   const handleDownloadPhoto = useCallback(async (photoId: string) => {
     const stored = await db.photos.get(photoId);
     if (!stored) return;
-    await savePhotoToDevice(decrypt(stored.dataUrl), `DispoCam-${photoId.slice(0, 8)}.jpg`);
+    const decrypted = decrypt(stored.dataUrl);
+    const polaroid = await addPolaroidBorder(decrypted);
+    await savePhotoToDevice(polaroid, `DispoCam-${photoId.slice(0, 8)}.jpg`);
   }, []);
 
   if (!isOpen) return null;
