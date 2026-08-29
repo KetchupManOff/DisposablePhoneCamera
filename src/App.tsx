@@ -4,9 +4,8 @@ import { DevelopmentTimer } from './components/roll/DevelopmentTimer';
 import { LockedGallery } from './components/roll/LockedGallery';
 import { ProjectList } from './components/project/ProjectList';
 import { CreateProject } from './components/project/CreateProject';
-import { TipButton } from './components/tips/TipButton';
+import { WelcomeGuide } from './components/ui/WelcomeGuide';
 import { Toast } from './components/ui/Toast';
-import { LanguageToggle } from './components/ui/LanguageToggle';
 import { useStore } from './store/useStore';
 import { useHydrateStore } from './hooks/useHydrateStore';
 import { useI18n } from './i18n/useI18n';
@@ -73,30 +72,7 @@ export default function App() {
       )}
 
       {screen === Screen.About && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-[90%] max-w-sm mx-auto bg-vintage-surface border border-vintage-border/40 rounded-2xl shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-vintage-border/20">
-              <h3 className="font-display text-vintage-text">{t('app.about')}</h3>
-              <div className="flex items-center gap-2">
-                <LanguageToggle />
-                <button onClick={() => setScreen(Screen.Camera)} className="text-vintage-muted hover:text-vintage-text">✕</button>
-              </div>
-            </div>
-            <div className="p-4 space-y-3">
-              <p className="text-4xl text-center">📸</p>
-              <h2 className="text-center font-display text-vintage-text text-lg">DispoCam</h2>
-              <p className="text-sm text-vintage-muted text-center">
-                {t('app.aboutTagline')}
-              </p>
-              <p className="text-xs text-vintage-muted/60 text-center">
-                {t('app.aboutFree')}
-              </p>
-              <div className="flex justify-center pt-2">
-                <TipButton />
-              </div>
-            </div>
-          </div>
-        </div>
+        <WelcomeGuide onClose={() => setScreen(Screen.Camera)} />
       )}
 
       <Toast message={toast.message} visible={toast.visible} onDismiss={dismissToast} />

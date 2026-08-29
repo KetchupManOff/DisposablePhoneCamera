@@ -378,13 +378,18 @@ export function Viewfinder({
           >
             {facingMode === 'environment' ? '🎥' : '🤳'}
           </button>
-          <button
-            onClick={onOpenTimerSettings}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-            aria-label={t('viewfinder.timer')}
-          >
-            ⏳
-          </button>
+          {/* 2026-08-29 — Le sablier (réglages timer/développement) n'est accessible
+              qu'en mode \"Control freak\". En mode simple, les réglages sont
+              verrouillés après la création du rouleau, comme un vrai jetable. */}
+          {currentProject?.mode === 'control' && (
+            <button
+              onClick={onOpenTimerSettings}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
+              aria-label={t('viewfinder.timer')}
+            >
+              ⏳
+            </button>
+          )}
           <button
             onClick={onOpenAbout}
             className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-sm hover:border-vintage-accent/60 transition-colors"

@@ -19,6 +19,81 @@ const fr: Record<string, string> = {
     "L'appareil photo jetable vintage dans votre poche. Créez plusieurs pellicules avec différents films, prenez vos poses et développez plus tard.",
   'app.aboutFree': '100% gratuit. Fonctionne hors-ligne. PWA installable.',
 
+  /* --- Guide / Accueil --- */
+  'guide.title': 'Bienvenue',
+  'guide.tab.philosophy': 'Philosophie',
+  'guide.tab.guide': 'Guide',
+  'guide.tab.install': 'Installer',
+
+  /* -- Philosophie -- */
+  'guide.philosophy.intro':
+    "DispoCam recrée l'expérience magique et imparfaite d'un appareil photo jetable argentique — directement dans votre téléphone.",
+  'guide.philosophy.limited':
+    "Un nombre de poses limité : chaque déclenchement compte. Comme un vrai jetable, vous avez un rouleau fini avant de pouvoir le développer.",
+  'guide.philosophy.wait':
+    "Un temps de développement obligatoire : vos photos restent cachées pendant plusieurs heures. L'impatience fait partie du jeu.",
+  'guide.philosophy.private':
+    "Vos photos sont chiffrées et verrouillées jusqu'au développement. Personne ne peut les voir avant l'heure — pas même vous.",
+  'guide.philosophy.surprise':
+    "La magie de la découverte : quand le minuteur arrive à zéro, vous redécouvrez vos souvenirs, comme en ouvrant une enveloppe de tirages.",
+  'guide.philosophy.vintage':
+    "Un rendu vintage authentique avec des films simulés (Kodak, Fuji, Ilford, Polaroid…) pour retrouver le grain et les couleurs de l'argentique.",
+  'guide.philosophy.footer':
+    'Pas d\'algorithme, pas de filtres instantanés, pas de retouche. Juste le plaisir de photographier et la patience de découvrir.',
+
+  /* -- Guide d\'utilisation -- */
+  'guide.steps.intro':
+    "Voici comment utiliser DispoCam en 5 étapes simples :",
+  'guide.steps.create.title': 'Créez une pellicule',
+  'guide.steps.create.desc':
+    "Donnez un nom à votre pellicule. C'est comme choisir une nouvelle pellicule photo dans votre appareil jetable.",
+  'guide.steps.settings.title': 'Choisissez votre film et vos réglages',
+  'guide.steps.settings.desc':
+    "Sélectionnez un film parmi nos profils couleur (Kodak Gold, Fuji Superia, Polaroid…) et définissez le nombre de poses, le ratio et le temps de développement.",
+  'guide.steps.shoot.title': 'Prenez vos photos',
+  'guide.steps.shoot.desc':
+    "Cadrez, déclenchez. Vous pouvez aussi utiliser les boutons de volume pour prendre une photo. Le compteur de poses vous indique combien il vous en reste.",
+  'guide.steps.develop.title': 'Patientez pendant le développement',
+  'guide.steps.develop.desc':
+    "Une fois la pellicule terminée (ou le temps de prise de vue écoulé), le développement commence automatiquement. Vos photos restent inaccessibles pendant cette période.",
+  'guide.steps.discover.title': 'Découvrez et exportez vos photos',
+  'guide.steps.discover.desc':
+    "Quand le développement est terminé, déverrouillez votre galerie et admirez vos clichés. Téléchargez-les d'un coup dans votre pellicule photo.",
+  'guide.steps.tip':
+    "Astuce : créez une pellicule avant une sortie, prenez vos photos sans vous soucier du résultat, et découvrez-les le lendemain — comme à l'époque de l'argentique !",
+
+  /* -- Installation PWA -- */
+  'guide.install.intro':
+    "DispoCam est une PWA (Progressive Web App). Installez-la sur votre écran d'accueil pour l'utiliser comme une vraie application, même sans réseau.",
+  'guide.install.benefits.offline.icon': '📡',
+  'guide.install.benefits.offline.label': 'Hors ligne',
+  'guide.install.benefits.fullscreen.icon': '📱',
+  'guide.install.benefits.fullscreen.label': 'Plein écran',
+  'guide.install.benefits.app.icon': '🚀',
+  'guide.install.benefits.app.label': 'Comme une app',
+
+  'guide.install.iphone.title': 'iPhone & iPad (Safari)',
+  'guide.install.iphone.step1':
+    'Ouvrez DispoCam <span class="text-vintage-accent">dans Safari</span> (cela ne fonctionne pas avec Chrome sur iOS).',
+  'guide.install.iphone.step2':
+    'Tapez sur le bouton <span class="text-vintage-accent">Partager</span> (le carré avec une flèche vers le haut) dans la barre de Safari.',
+  'guide.install.iphone.step3':
+    'Dans le menu qui apparaît, faites défiler et sélectionnez <span class="text-vintage-accent">Sur l\'écran d\'accueil</span> (ou "Ajouter à l\'écran d\'accueil").',
+  'guide.install.iphone.step4':
+    'Tapez sur <span class="text-vintage-accent">Ajouter</span> en haut à droite. L\'app DispoCam apparaîtra sur votre écran d\'accueil comme une vraie app.',
+  'guide.install.iphone.safariNote':
+    '⚠️ Important : vous devez impérativement ouvrir le site dans Safari. L\'option "Sur l\'écran d\'accueil" n\'apparaît pas dans d\'autres navigateurs sur iOS.',
+
+  'guide.install.android.title': 'Android (Chrome)',
+  'guide.install.android.step1':
+    'Ouvrez DispoCam <span class="text-vintage-accent">dans Chrome</span> sur votre appareil Android.',
+  'guide.install.android.step2':
+    'Tapez sur les <span class="text-vintage-accent">trois points ⋮</span> (menu) en haut à droite de Chrome.',
+  'guide.install.android.step3':
+    'Sélectionnez <span class="text-vintage-accent">Installer l\'application</span> ou <span class="text-vintage-accent">Ajouter à l\'écran d\'accueil</span>. Confirmez, et DispoCam sera ajoutée à vos apps.',
+  'guide.install.android.chromeNote':
+    '💡 Sur Android, Chrome peut également proposer un bandeau "Ajouter à l\'écran d\'accueil" en bas de la page lors de votre première visite.',
+
   /* --- Menu principal (liste des pellicules) --- */
   'projects.title': 'Mes pellicules',
   'projects.new': '+ Nouvelle',
@@ -196,6 +271,81 @@ export const en: Record<string, string> = {
   'app.aboutTagline':
     'The vintage disposable camera in your pocket. Create multiple rolls with different films, take your shots, and develop them later.',
   'app.aboutFree': '100% free. Works offline. Installable PWA.',
+
+  /* --- Guide / Welcome --- */
+  'guide.title': 'Welcome',
+  'guide.tab.philosophy': 'Philosophy',
+  'guide.tab.guide': 'Guide',
+  'guide.tab.install': 'Install',
+
+  /* -- Philosophy -- */
+  'guide.philosophy.intro':
+    'DispoCam recreates the magical and imperfect experience of a disposable film camera — right inside your phone.',
+  'guide.philosophy.limited':
+    'Limited exposures: every shot counts. Just like a real disposable, you have a finite roll before you can develop it.',
+  'guide.philosophy.wait':
+    'Mandatory development time: your photos stay hidden for several hours. The anticipation is part of the fun.',
+  'guide.philosophy.private':
+    'Your photos are encrypted and locked until development. Nobody can see them before the timer runs out — not even you.',
+  'guide.philosophy.surprise':
+    'The magic of discovery: when the timer hits zero, you rediscover your memories, just like opening an envelope of prints.',
+  'guide.philosophy.vintage':
+    'Authentic vintage rendering with simulated film stocks (Kodak, Fuji, Ilford, Polaroid…) to bring back the grain and colors of analog photography.',
+  'guide.philosophy.footer':
+    'No algorithm, no instant filters, no editing. Just the joy of taking photos and the patience of discovering them.',
+
+  /* -- Usage Guide -- */
+  'guide.steps.intro':
+    'Here is how to use DispoCam in 5 simple steps:',
+  'guide.steps.create.title': 'Create a roll',
+  'guide.steps.create.desc':
+    'Give your roll a name. It is like loading a fresh film roll into your disposable camera.',
+  'guide.steps.settings.title': 'Choose your film and settings',
+  'guide.steps.settings.desc':
+    'Pick a film from our color profiles (Kodak Gold, Fuji Superia, Polaroid…) and set the number of exposures, aspect ratio, and development time.',
+  'guide.steps.shoot.title': 'Take your photos',
+  'guide.steps.shoot.desc':
+    'Frame, shoot. You can also use the volume buttons to capture. The exposure counter shows how many shots you have left.',
+  'guide.steps.develop.title': 'Wait for development',
+  'guide.steps.develop.desc':
+    'Once the roll is full (or the shooting window expires), development starts automatically. Your photos remain locked during this period.',
+  'guide.steps.discover.title': 'Discover and export your photos',
+  'guide.steps.discover.desc':
+    'When development is complete, unlock your gallery and admire your shots. Download them all at once to your photo library.',
+  'guide.steps.tip':
+    'Tip: create a roll before going out, take your photos without worrying about the result, and discover them the next day — just like the film era!',
+
+  /* -- PWA Installation -- */
+  'guide.install.intro':
+    'DispoCam is a PWA (Progressive Web App). Install it on your home screen to use it like a native app, even offline.',
+  'guide.install.benefits.offline.icon': '📡',
+  'guide.install.benefits.offline.label': 'Offline',
+  'guide.install.benefits.fullscreen.icon': '📱',
+  'guide.install.benefits.fullscreen.label': 'Full screen',
+  'guide.install.benefits.app.icon': '🚀',
+  'guide.install.benefits.app.label': 'Like an app',
+
+  'guide.install.iphone.title': 'iPhone & iPad (Safari)',
+  'guide.install.iphone.step1':
+    'Open DispoCam <span class="text-vintage-accent">in Safari</span> (this does not work with Chrome on iOS).',
+  'guide.install.iphone.step2':
+    'Tap the <span class="text-vintage-accent">Share</span> button (the square with an upward arrow) in the Safari toolbar.',
+  'guide.install.iphone.step3':
+    'In the menu that appears, scroll down and select <span class="text-vintage-accent">Add to Home Screen</span>.',
+  'guide.install.iphone.step4':
+    'Tap <span class="text-vintage-accent">Add</span> in the top right corner. The DispoCam app will appear on your home screen like a native app.',
+  'guide.install.iphone.safariNote':
+    '⚠️ Important: you must open the website in Safari. The "Add to Home Screen" option does not appear in other browsers on iOS.',
+
+  'guide.install.android.title': 'Android (Chrome)',
+  'guide.install.android.step1':
+    'Open DispoCam <span class="text-vintage-accent">in Chrome</span> on your Android device.',
+  'guide.install.android.step2':
+    'Tap the <span class="text-vintage-accent">three dots ⋮</span> (menu) in the top right corner of Chrome.',
+  'guide.install.android.step3':
+    'Select <span class="text-vintage-accent">Install app</span> or <span class="text-vintage-accent">Add to Home screen</span>. Confirm, and DispoCam will be added to your apps.',
+  'guide.install.android.chromeNote':
+    '💡 On Android, Chrome may also show an "Add to Home screen" banner at the bottom of the page on your first visit.',
 
   /* --- Main menu (roll list) --- */
   'projects.title': 'My rolls',
