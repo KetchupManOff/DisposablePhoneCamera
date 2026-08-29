@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '../../store/useStore';
 import { useLockTimer } from '../../hooks/useLockTimer';
 import { db } from '../../lib/db';
 import { decrypt } from '../../lib/crypto';
-import { savePhotoToDevice } from '../../lib/saveToDevice';
+import { savePhotoToDevice, savePhotosToDevice } from '../../lib/saveToDevice';
 
 interface LockedGalleryProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ function PrintCard({
   total,
   photoId,
   timestamp,
+  saved,
   onSave,
   onTrash,
 }: {
@@ -23,11 +24,11 @@ function PrintCard({
   total: number;
   photoId: string;
   timestamp: number;
+  saved: boolean;
   onSave: (id: string) => void;
   onTrash: (id: string) => void;
 }) {
   const [isSaving, setIsSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [isTrashing, setIsTrashing] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -48,7 +49,6 @@ function PrintCard({
       const filename = `DispoCam-${dateStr.replace(' ', '-')}-${timeStr.replace(':', 'h')}.jpg`;
       const success = await savePhotoToDevice(decrypted, filename);
       if (success) {
-        setIsSaved(true);
         onSave(photoId);
       }
     } catch {
@@ -68,21 +68,21 @@ function PrintCard({
       className={`relative flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${
         isTrashing
           ? 'opacity-0 scale-95 -translate-x-4'
-          : isSaved
+          : saved
             ? 'border-vintage-accent/30 bg-vintage-accent/5'
             : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/50'
       }`}
     >
       <div
         className={`shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-2xl transition-colors ${
-          isSaved
-            ? 'bg-vintage-accent/20 text-vintage-accent'
-            : isTrashing
-              ? 'bg-red-500/10 text-red-400'
+          isTrashing
+            ? 'bg-red-500/10 text-red-400'
+            : saved
+              ? 'bg-vintage-accent/20 text-vintage-accent'
               : 'bg-vintage-surface/50 text-vintage-muted'
         }`}
       >
-        {isSaved ? '✅' : isTrashing ? '🗑️' : '🖼️'}
+        {isTrashing ? '🗑️' : saved ? '✅' : '🖼️'}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-display text-vintage-text">
@@ -91,7 +91,7 @@ function PrintCard({
         <p className="text-[11px] font-mono text-vintage-muted">
           {dateStr} · {timeStr}
         </p>
-        {isSaved && (
+        {saved && (
           <p className="text-[10px] font-mono text-vintage-accent mt-0.5">
             Enregistrée dans vos photos ✓
           </p>
@@ -100,8 +100,8 @@ function PrintCard({
           <p className="text-[10px] font-mono text-red-400 mt-0.5">{saveError}</p>
         )}
       </div>
-      {!isSaved && !isTrashing && (
-        <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
+        {!saved && (
           <button
             onClick={handleSave}
             disabled={isSaving}
@@ -109,14 +109,140 @@ function PrintCard({
           >
             {isSaving ? '⏳' : '💾 Sauvegarder'}
           </button>
+        )}
+        <button
+          onClick={handleTrash}
+          disabled={isTrashing}
+          className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono hover:bg-red-500/20 transition-all"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  );
+}
+/** Full-screen photo viewer for control mode: swipe / arrows / keyboard navigation. */
+function Lightbox({
+  photos,
+  decryptedUrls,
+  index,
+  onIndexChange,
+  onClose,
+  onDownload,
+  onDelete,
+}: {
+  photos: { id: string; timestamp: number }[];
+  decryptedUrls: Map<string, string>;
+  index: number | null;
+  onIndexChange: (i: number | null) => void;
+  onClose: () => void;
+  onDownload: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const touchStartX = useRef<number | null>(null);
+
+  // Clamp the index when photos are deleted from within the lightbox
+  useEffect(() => {
+    if (index === null) return;
+    if (photos.length === 0) {
+      onIndexChange(null);
+    } else if (index >= photos.length) {
+      onIndexChange(photos.length - 1);
+    }
+  }, [index, photos.length, onIndexChange]);
+
+  // Keyboard navigation (desktop)
+  useEffect(() => {
+    if (index === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowRight') onIndexChange((index + 1) % photos.length);
+      else if (e.key === 'ArrowLeft') onIndexChange((index - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [index, photos.length, onIndexChange, onClose]);
+
+  if (index === null || photos.length === 0) return null;
+
+  const photo = photos[index];
+  const url = decryptedUrls.get(photo.id);
+  const date = new Date(photo.timestamp);
+  const label = `${date.toLocaleDateString([], { day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+  return (
+    <div className="absolute inset-0 z-[60] bg-black/95 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-safe-6">
+        <p className="font-mono text-vintage-muted text-sm">
+          {index + 1} / {photos.length}
+        </p>
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Photo area (swipe to navigate) */}
+      <div
+        className="flex-1 flex items-center justify-center relative overflow-hidden"
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current === null) return;
+          const delta = e.changedTouches[0].clientX - touchStartX.current;
+          if (Math.abs(delta) > 50) {
+            if (delta < 0) onIndexChange((index + 1) % photos.length);
+            else onIndexChange((index - 1 + photos.length) % photos.length);
+          }
+          touchStartX.current = null;
+        }}
+      >
+        {url ? (
+          <img
+            src={url}
+            alt={`Photo ${date.toLocaleDateString()}`}
+            className="max-h-full max-w-full object-contain"
+            draggable={false}
+          />
+        ) : (
+          <div className="text-vintage-muted/50 text-xl">🎞️</div>
+        )}
+        <button
+          onClick={() => onIndexChange((index - 1 + photos.length) % photos.length)}
+          className="absolute left-2 sm:left-4 w-9 h-9 rounded-full bg-black/50 border border-vintage-border/40 flex items-center justify-center text-vintage-text hover:border-vintage-accent/60 transition-colors"
+          aria-label="Photo précédente"
+        >
+          ‹
+        </button>
+        <button
+          onClick={() => onIndexChange((index + 1) % photos.length)}
+          className="absolute right-2 sm:right-4 w-9 h-9 rounded-full bg-black/50 border border-vintage-border/40 flex items-center justify-center text-vintage-text hover:border-vintage-accent/60 transition-colors"
+          aria-label="Photo suivante"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Footer : info + actions */}
+      <div className="p-4 border-t border-vintage-border/20 flex items-center justify-between gap-3">
+        <p className="text-xs font-mono text-vintage-muted">{label}</p>
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={handleTrash}
-            className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono hover:bg-red-500/20 transition-all"
+            onClick={() => onDownload(photo.id)}
+            className="px-3 py-2 rounded-lg bg-vintage-accent/20 border border-vintage-accent/40 text-vintage-accent text-xs font-mono hover:bg-vintage-accent/30 transition-all"
           >
-            🗑️
+            💾 Enregistrer
+          </button>
+          <button
+            onClick={() => onDelete(photo.id)}
+            className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono hover:bg-red-500/20 transition-all"
+          >
+            🗑️ Supprimer
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -125,62 +251,89 @@ function ControlGallery({
   photos,
   decryptedUrls,
   onClose,
+  onRemovePhoto,
+  onDownload,
   projectName,
   maxPoses,
 }: {
   photos: { id: string; timestamp: number }[];
   decryptedUrls: Map<string, string>;
   onClose: () => void;
+  onRemovePhoto: (id: string) => void;
+  onDownload: (id: string) => void;
   projectName: string;
   maxPoses: number;
 }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
-      <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
-        <h2 className="text-lg font-display text-vintage-text">
-          {projectName} ({photos.length}/{maxPoses})
-        </h2>
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
-        >
-          ✕
-        </button>
+    <>
+      <div className="absolute inset-0 z-50 flex flex-col bg-vintage-bg/95 backdrop-blur-md">
+        <div className="flex items-center justify-between p-4 pt-safe-6 border-b border-vintage-border/30">
+          <h2 className="text-lg font-display text-vintage-text">
+            {projectName} ({photos.length}/{maxPoses})
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-vintage-surface/50 border border-vintage-border/50 flex items-center justify-center text-vintage-muted hover:text-vintage-text"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 no-scrollbar">
+          {photos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <p className="text-5xl mb-4">🎞️</p>
+              <p className="text-vintage-muted text-sm">Aucune photo pour le moment.</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-[10px] font-mono text-vintage-muted mb-3 text-center">
+                Appuyez sur une photo pour la voir en grand
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {photos.map((photo, i) => {
+                  const url = decryptedUrls.get(photo.id);
+                  return (
+                    <button
+                      key={photo.id}
+                      onClick={() => setSelectedIndex(i)}
+                      className="aspect-square rounded-lg overflow-hidden bg-vintage-surface/50 border border-vintage-border/30 group relative"
+                    >
+                      {url ? (
+                        <img
+                          src={url}
+                          alt={`Photo ${photo.id}`}
+                          className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-vintage-muted/40">
+                          🎞️
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 no-scrollbar">
-        {photos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-5xl mb-4">🎞️</p>
-            <p className="text-vintage-muted text-sm">Aucune photo pour le moment.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {photos.map((photo) => {
-              const url = decryptedUrls.get(photo.id);
-              return (
-                <div
-                  key={photo.id}
-                  className="aspect-square rounded-lg overflow-hidden bg-vintage-surface/50 border border-vintage-border/30"
-                >
-                  {url ? (
-                    <img
-                      src={url}
-                      alt={`Photo ${photo.id}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-vintage-muted/40">
-                      🎞️
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+
+      {selectedIndex !== null && (
+        <Lightbox
+          photos={photos}
+          decryptedUrls={decryptedUrls}
+          index={selectedIndex}
+          onIndexChange={setSelectedIndex}
+          onClose={() => setSelectedIndex(null)}
+          onDownload={onDownload}
+          onDelete={onRemovePhoto}
+        />
+      )}
+    </>
   );
 }
 /** Simple mode gallery: "print stack" — photos must be saved to device to be seen. */
@@ -194,11 +347,37 @@ function SimpleGallery({
   onRemovePhoto: (id: string) => void;
 }) {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const savedCount = savedIds.size;
+  const allSaved = photos.length > 0 && savedCount === photos.length;
 
   const handleSave = useCallback((id: string) => {
     setSavedIds((prev) => new Set(prev).add(id));
   }, []);
+
+  const handleDownloadAll = useCallback(async () => {
+    if (photos.length === 0 || isDownloadingAll) return;
+    setIsDownloadingAll(true);
+    setDownloadError(null);
+    try {
+      const items: { dataUrl: string; filename: string }[] = [];
+      for (let i = 0; i < photos.length; i++) {
+        const stored = await db.photos.get(photos[i].id);
+        if (stored) {
+          items.push({ dataUrl: decrypt(stored.dataUrl), filename: `DispoCam-${i + 1}.jpg` });
+        }
+      }
+      const ok = await savePhotosToDevice(items);
+      if (ok) {
+        setSavedIds(new Set(photos.map((p) => p.id)));
+      }
+    } catch {
+      setDownloadError('Échec du téléchargement. Réessayez.');
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  }, [photos, isDownloadingAll]);
 
   if (photos.length === 0) {
     return (
@@ -245,9 +424,30 @@ function SimpleGallery({
       <div className="px-4 py-3 border-b border-vintage-border/20 bg-vintage-surface/10">
         <p className="text-xs font-mono text-vintage-muted text-center leading-relaxed">
           Comme de vrais tirages, vos photos sont masquées.<br />
-          <span className="text-vintage-accent">Sauvegardez-les</span> dans votre pellicule pour les voir,
-          ou <span className="text-red-400">jetez</span> celles que vous n&apos;aimez pas.
+          <span className="text-vintage-accent">Téléchargez-les d&apos;un coup</span> dans votre pellicule pour les voir,
+          puis <span className="text-red-400">jetez</span> celles que vous n&apos;aimez pas.
         </p>
+      </div>
+
+      {/* Download-all */}
+      <div className="px-4 pt-4">
+        <button
+          onClick={handleDownloadAll}
+          disabled={isDownloadingAll || allSaved}
+          className="w-full py-4 rounded-2xl bg-vintage-accent/90 text-vintage-bg font-display text-base flex items-center justify-center gap-2 hover:bg-vintage-accent disabled:opacity-50 transition-all cursor-pointer"
+        >
+          {isDownloadingAll
+            ? '⏳ Téléchargement…'
+            : allSaved
+              ? '✅ Tout est dans vos photos'
+              : '📥 Tout télécharger dans mes photos'}
+        </button>
+        <p className="text-[10px] font-mono text-vintage-muted text-center mt-2">
+          Les {photos.length} photos seront exportées en une fois dans votre pellicule photo.
+        </p>
+        {downloadError && (
+          <p className="text-[10px] font-mono text-red-400 text-center mt-1">{downloadError}</p>
+        )}
       </div>
 
       {/* Print stack */}
@@ -259,6 +459,7 @@ function SimpleGallery({
             total={photos.length}
             photoId={photo.id}
             timestamp={photo.timestamp}
+            saved={savedIds.has(photo.id)}
             onSave={handleSave}
             onTrash={onRemovePhoto}
           />
@@ -318,9 +519,20 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
       await db.photos.delete(photoId);
       const updated = photos.filter((p) => p.id !== photoId);
       setCurrentProjectPhotos(updated);
+      setDecryptedUrls((prev) => {
+        const next = new Map(prev);
+        next.delete(photoId);
+        return next;
+      });
     },
     [currentProject, photos, setCurrentProjectPhotos],
   );
+
+  const handleDownloadPhoto = useCallback(async (photoId: string) => {
+    const stored = await db.photos.get(photoId);
+    if (!stored) return;
+    await savePhotoToDevice(decrypt(stored.dataUrl), `DispoCam-${photoId.slice(0, 8)}.jpg`);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -365,6 +577,8 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
         photos={photos.map((p) => ({ id: p.id, timestamp: p.timestamp }))}
         decryptedUrls={decryptedUrls}
         onClose={onClose}
+        onRemovePhoto={handleRemovePhoto}
+        onDownload={handleDownloadPhoto}
         projectName={currentProject?.name ?? 'Rouleau'}
         maxPoses={currentProject?.maxPoses ?? 0}
       />
