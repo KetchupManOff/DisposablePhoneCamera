@@ -2,6 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- Thème par défaut (Classic) --- */
+:root {
+  --color-bg: #1A180E;
+  --color-surface: #2C2818;
+  --color-border: #4A4028;
+  --color-text: #F5ECD7;
+  --color-muted: #A89570;
+  --color-accent: #E5B84C;
+  --color-accent-rgb: 229, 184, 76;
+  --color-danger: #D64045;
+}
+
+/* --- Fujifilm QuickSnap — Vert Fuji --- */
+[data-theme="fujifilm-quicksnap"] {
+  --color-bg: #cce6d2;
+  --color-surface: #a3d1ac;
+  --color-border: #7abb85;
+  --color-text: #114a22;
+  --color-muted: #256d39;
+  --color-accent: #2ECC40;
+  --color-accent-rgb: 46, 204, 64;
+  --color-danger: #E74C3C;
+}
+
+/* --- Kodak FunSaver — Jaune/rouge chaud Kodak --- */
+[data-theme="kodak-funsaver"] {
+  --color-bg: #ffebb3;
+  --color-surface: #ffda73;
+  --color-border: #e6b939;
+  --color-text: #664900;
+  --color-muted: #997300;
+  --color-accent: #FF3B30;
+  --color-accent-rgb: 255, 59, 48;
+  --color-danger: #E74C3C;
+}
+
+/* --- Lomography Simple Use Color — Turquoise funky --- */
+[data-theme="lomo-simple-color"] {
+  --color-bg: #cceeff;
+  --color-surface: #80ccff;
+  --color-border: #33aaff;
+  --color-text: #004466;
+  --color-muted: #0077b3;
+  --color-accent: #FF007F;
+  --color-accent-rgb: 255, 0, 127;
+  --color-danger: #FF4081;
+}
+
+/* --- Lomography Simple Use B&W — Monochrome --- */
+[data-theme="lomo-simple-bw"] {
+  --color-bg: #e6e6e6;
+  --color-surface: #cccccc;
+  --color-border: #999999;
+  --color-text: #1a1a1a;
+  --color-muted: #4d4d4d;
+  --color-accent: #FF3B30;
+  --color-accent-rgb: 255, 59, 48;
+  --color-danger: #FF5252;
+}
+
+/* --- Ilford HP5 Plus — N&B classique --- */
+[data-theme="ilford-hp5"] {
+  --color-bg: #d9e0d9;
+  --color-surface: #a3b3a3;
+  --color-border: #668066;
+  --color-text: #0f1a0f;
+  --color-muted: #2d4d2d;
+  --color-accent: #4CAF50;
+  --color-accent-rgb: 76, 175, 80;
+  --color-danger: #C0392B;
+}
+
+/* --- Ilford XP2 Super — N&B chromogénique lisse --- */
+[data-theme="ilford-xp2"] {
+  --color-bg: #e6d9e6;
+  --color-surface: #c299c2;
+  --color-border: #996699;
+  --color-text: #331a33;
+  --color-muted: #663366;
+  --color-accent: #9C27B0;
+  --color-accent-rgb: 156, 39, 176;
+  --color-danger: #C0392B;
+}
+
+/* --- AgfaPhoto LeBox — Rouge Agfa allemand --- */
+[data-theme="agfa-lebox"] {
+  --color-bg: #ffd9d9;
+  --color-surface: #ff9999;
+  --color-border: #e64d4d;
+  --color-text: #660000;
+  --color-muted: #990000;
+  --color-accent: #000000;
+  --color-accent-rgb: 0, 0, 0;
+  --color-danger: #D32F2F;
+}
+
+/* --- Kodak Tri-X 400 — N&B dramatique --- */
+[data-theme="kodak-tri-x"] {
+  --color-bg: #f2f2f2;
+  --color-surface: #d9d9d9;
+  --color-border: #b3b3b3;
+  --color-text: #000000;
+  --color-muted: #404040;
+  --color-accent: #FFEB3B;
+  --color-accent-rgb: 255, 235, 59;
+  --color-danger: #E74C3C;
+}
+
+/* --- Polaroid 600 — Arc-en-ciel rétro --- */
+[data-theme="polaroid-600"] {
+  --color-bg: #f0f4f8;
+  --color-surface: #cfdbe8;
+  --color-border: #a3bbd1;
+  --color-text: #1f3a52;
+  --color-muted: #3b6a94;
+  --color-accent: #F06292;
+  --color-accent-rgb: 240, 98, 146;
+  --color-danger: #EF5350;
+}
+
+/* --- Fujifilm Instax Mini — Pastel rose --- */
+[data-theme="instax-mini"] {
+  --color-bg: #ffe6f2;
+  --color-surface: #ffb3d9;
+  --color-border: #ff66b3;
+  --color-text: #660033;
+  --color-muted: #b30059;
+  --color-accent: #00BCD4;
+  --color-accent-rgb: 0, 188, 212;
+  --color-danger: #E53935;
+}
+
+/* --- Fujifilm Instax Wide — Pastel bleu ciel --- */
+[data-theme="instax-wide"] {
+  --color-bg: #e6f7ff;
+  --color-surface: #99dcff;
+  --color-border: #33bbff;
+  --color-text: #00334d;
+  --color-muted: #006699;
+  --color-accent: #FF9800;
+  --color-accent-rgb: 255, 152, 0;
+  --color-danger: #EF5350;
+}
+
+/* --- Ilford Ilfocolor Rapid Retro Edition — Orange chaud / rétro --- */
+[data-theme="ilford-ilfocolor-rapid"] {
+  --color-bg: #ffe6cc;
+  --color-surface: #ffb366;
+  --color-border: #e68a00;
+  --color-text: #663d00;
+  --color-muted: #995c00;
+  --color-accent: #2196F3;
+  --color-accent-rgb: 33, 150, 243;
+  --color-danger: #E53935;
+}
+
 /* --- Base reset for mobile camera app --- */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -17,7 +173,7 @@ body,
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: #0f0f1a;
+  background: var(--color-bg, #1A180E);
 }
 
 /* --- Vintage viewfinder overlay --- */
@@ -32,7 +188,7 @@ body,
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid rgba(196, 164, 62, 0.3);
+  border: 3px solid rgba(var(--color-accent-rgb, 229, 184, 76), 0.45);
   border-radius: 4px;
 }
 
@@ -49,7 +205,7 @@ body,
 .viewfinder-crosshair::after {
   content: '';
   position: absolute;
-  background: rgba(196, 164, 62, 0.5);
+  background: rgba(var(--color-accent-rgb, 229, 184, 76), 0.7);
 }
 
 .viewfinder-crosshair::before {

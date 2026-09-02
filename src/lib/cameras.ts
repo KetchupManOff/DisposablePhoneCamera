@@ -38,6 +38,8 @@ export interface CameraDefinition {
   specs: string;
   /** Résumé technique en anglais. */
   specsEn: string;
+  /** Thème UI associé (palette de couleurs de l'interface) */
+  themeId: string;
 }
 
 export const CAMERAS: CameraDefinition[] = [
@@ -53,6 +55,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 400 · 27 poses · 3:2',
     specsEn: '35 mm · ISO 400 · 27 exposures · 3:2',
+    themeId: 'fujifilm-quicksnap',
   },
   {
     id: 'kodak-funsaver',
@@ -66,6 +69,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 800 · 27 poses · 3:2',
     specsEn: '35 mm · ISO 800 · 27 exposures · 3:2',
+    themeId: 'kodak-funsaver',
   },
   {
     id: 'lomo-simple-color',
@@ -79,6 +83,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 36,
     specs: '35 mm · ISO 400 · 36 poses · 3:2',
     specsEn: '35 mm · ISO 400 · 36 exposures · 3:2',
+    themeId: 'lomo-simple-color',
   },
   {
     id: 'lomo-simple-bw',
@@ -92,6 +97,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 36,
     specs: '35 mm · ISO 400 N&B · 36 poses · 3:2',
     specsEn: '35 mm · ISO 400 B&W · 36 exposures · 3:2',
+    themeId: 'lomo-simple-bw',
   },
   {
     id: 'ilford-hp5',
@@ -105,6 +111,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 400 N&B · 27 poses · 3:2',
     specsEn: '35 mm · ISO 400 B&W · 27 exposures · 3:2',
+    themeId: 'ilford-hp5',
   },
   {
     id: 'ilford-xp2',
@@ -118,6 +125,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 400 N&B C41 · 27 poses · 3:2',
     specsEn: '35 mm · ISO 400 B&W C41 · 27 exposures · 3:2',
+    themeId: 'ilford-xp2',
   },
   {
     id: 'agfa-lebox',
@@ -131,6 +139,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 400 · 27 poses · 3:2',
     specsEn: '35 mm · ISO 400 · 27 exposures · 3:2',
+    themeId: 'agfa-lebox',
   },
   {
     id: 'kodak-tri-x',
@@ -144,6 +153,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 27,
     specs: '35 mm · ISO 400 N&B · 27 poses · 3:2',
     specsEn: '35 mm · ISO 400 B&W · 27 exposures · 3:2',
+    themeId: 'kodak-tri-x',
   },
   {
     id: 'polaroid-600',
@@ -157,6 +167,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 8,
     specs: 'Instantané · ISO 640 · 8 poses · 1:1',
     specsEn: 'Instant · ISO 640 · 8 shots · 1:1',
+    themeId: 'polaroid-600',
   },
   {
     id: 'instax-mini',
@@ -170,6 +181,7 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 10,
     specs: 'Instantané · ISO 800 · 10 poses · 62×46 mm',
     specsEn: 'Instant · ISO 800 · 10 shots · 62×46 mm',
+    themeId: 'instax-mini',
   },
   {
     id: 'instax-wide',
@@ -183,6 +195,21 @@ export const CAMERAS: CameraDefinition[] = [
     exposures: 10,
     specs: 'Instantané · ISO 800 · 10 poses · 99×62 mm',
     specsEn: 'Instant · ISO 800 · 10 shots · 99×62 mm',
+    themeId: 'instax-wide',
+  },
+  {
+    id: 'ilford-ilfocolor-rapid',
+    label: 'Ilford Ilfocolor Rapid Retro Edition',
+    manufacturer: 'Ilford',
+    emoji: '🍊',
+    description: 'Ilford Ilfocolor Rapid Retro Edition. Film couleur 400, tons chauds et rétro.',
+    descriptionEn: 'Ilford Ilfocolor Rapid Retro Edition. ISO 400 color film, warm retro tones.',
+    colorProfile: 'agfa-vista',
+    aspectRatio: '3:2',
+    exposures: 27,
+    specs: '35 mm · ISO 400 · 27 poses · 3:2',
+    specsEn: '35 mm · ISO 400 · 27 exposures · 3:2',
+    themeId: 'ilford-ilfocolor-rapid',
   },
 ];
 

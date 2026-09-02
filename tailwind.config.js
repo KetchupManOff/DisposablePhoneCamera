@@ -5,13 +5,13 @@ export default {
     extend: {
       colors: {
         vintage: {
-          bg: '#0f0f1a',
-          surface: '#1a1a2e',
-          border: '#2d2d44',
-          text: '#e8dcc8',
-          muted: '#8a8575',
-          accent: '#c4a43e',
-          danger: '#8b3a3a',
+          bg: 'var(--color-bg)',
+          surface: 'var(--color-surface)',
+          border: 'var(--color-border)',
+          text: 'var(--color-text)',
+          muted: 'var(--color-muted)',
+          accent: 'var(--color-accent)',
+          danger: 'var(--color-danger)',
         },
       },
       fontFamily: {
@@ -34,8 +34,8 @@ export default {
           '100%': { transform: 'translateY(-8px)', opacity: '0' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 8px rgba(196, 164, 62, 0.4)' },
-          '50%': { boxShadow: '0 0 20px rgba(196, 164, 62, 0.8)' },
+          '0%, 100%': { boxShadow: '0 0 8px rgba(var(--color-accent-rgb, 229, 184, 76), 0.5)' },
+          '50%': { boxShadow: '0 0 24px rgba(var(--color-accent-rgb, 229, 184, 76), 0.9)' },
         },
       },
     },

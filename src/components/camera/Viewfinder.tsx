@@ -91,29 +91,29 @@ function AspectRatioMask({
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
       {mask.top > 0 && (
-        <div className="absolute left-0 right-0 bg-black/50 backdrop-blur-[1px]"
+        <div className="absolute left-0 right-0 bg-vintage-bg backdrop-blur-[1px]"
           style={{ top: 0, height: mask.top }} />
       )}
       {mask.bottom > 0 && (
-        <div className="absolute left-0 right-0 bg-black/50 backdrop-blur-[1px]"
+        <div className="absolute left-0 right-0 bg-vintage-bg backdrop-blur-[1px]"
           style={{ bottom: 0, height: mask.bottom }} />
       )}
       {mask.left > 0 && (
-        <div className="absolute top-0 bottom-0 bg-black/50 backdrop-blur-[1px]"
+        <div className="absolute top-0 bottom-0 bg-vintage-bg backdrop-blur-[1px]"
           style={{ left: 0, width: mask.left }} />
       )}
       {mask.right > 0 && (
-        <div className="absolute top-0 bottom-0 bg-black/50 backdrop-blur-[1px]"
+        <div className="absolute top-0 bottom-0 bg-vintage-bg backdrop-blur-[1px]"
           style={{ right: 0, width: mask.right }} />
       )}
       {/* Cadre doré */}
-      <div className="absolute border-2 border-vintage-accent/40 rounded-sm"
+      <div className="absolute border-[3px] border-vintage-accent/45 rounded-sm"
         style={{ top: mask.top, bottom: mask.bottom, left: mask.left, right: mask.right }} />
       {/* Coins accentués */}
       {(['tl', 'tr', 'bl', 'br'] as const).map((corner) => (
         <div
           key={corner}
-          className="absolute w-4 h-4 border-vintage-accent/60"
+          className="absolute w-5 h-5 border-vintage-accent/70"
           style={{
             top: corner.startsWith('t') ? (mask.top > 0 ? mask.top + 4 : 4) : undefined,
             bottom: corner.startsWith('b') ? (mask.bottom > 0 ? mask.bottom + 4 : 4) : undefined,
@@ -232,12 +232,12 @@ export function Viewfinder({
   }, [currentProject?.id]);
 
   return (
-    <div className="w-full h-full bg-black overflow-hidden flex flex-col landscape:flex-row">
+    <div className="w-full h-full bg-vintage-bg overflow-hidden flex flex-col landscape:flex-row">
       {/* === ZONE CAMÉRA === */}
-      <div className="relative flex-1 min-h-0 min-w-0 flex flex-col">
+      <div className="relative flex-1 min-h-0 min-w-0 flex flex-col bg-black">
         {/* === BARRE SUPÉRIEURE : statut + actions === */}
         <div
-          className="z-30 px-3 pb-2"
+          className="z-30 px-3 pb-2 bg-vintage-bg"
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
         >
 
@@ -373,7 +373,7 @@ export function Viewfinder({
         bord inférieur de l'écran).
       */}
       <div
-        className="shrink-0 z-30 flex flex-row landscape:flex-col-reverse items-center justify-between landscape:justify-center gap-3 border-t landscape:border-t-0 landscape:border-l border-vintage-border/40 bg-black/40 backdrop-blur-sm pt-4 pl-[calc(env(safe-area-inset-left,0px)+1rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] landscape:pb-[calc(env(safe-area-inset-bottom,0px)+2.5rem)] pr-[calc(env(safe-area-inset-right,0px)+1rem)]"
+        className="shrink-0 z-30 flex flex-row landscape:flex-col-reverse items-center justify-between landscape:justify-center gap-3 border-t landscape:border-t-0 landscape:border-l border-vintage-border/40 bg-vintage-bg pt-4 pl-[calc(env(safe-area-inset-left,0px)+1rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] landscape:pb-[calc(env(safe-area-inset-bottom,0px)+2.5rem)] pr-[calc(env(safe-area-inset-right,0px)+1rem)]"
       >
         {/* Molette d'armement */}
         {canTakePhotos && (

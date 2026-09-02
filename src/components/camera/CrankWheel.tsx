@@ -152,7 +152,7 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
         <div
           className="absolute inset-0 rounded-full border border-vintage-border/70"
           style={{
-            background: 'repeating-conic-gradient(#23233a 0deg 12deg, #0f0f1a 12deg 18deg)',
+            background: 'repeating-conic-gradient(var(--color-surface) 0deg 12deg, var(--color-bg) 12deg 18deg)',
             boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.5)',
           }}
         />
@@ -172,7 +172,7 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
             cy="48"
             r="44"
             fill="none"
-            stroke="#c4a43e"
+            stroke="var(--color-accent)"
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray={`${progress * RING} ${RING}`}
@@ -193,7 +193,7 @@ export function CrankWheel({ isCocked, onCocked }: CrankWheelProps) {
         >
           <div
             className="absolute left-1/2 -translate-x-1/2 -top-[3px] w-2.5 h-5 rounded-full bg-vintage-accent"
-            style={{ boxShadow: '0 0 8px rgba(196,164,62,0.9)' }}
+            style={{ boxShadow: '0 0 8px rgba(var(--color-accent-rgb), 0.9)' }}
           />
         </div>
 

@@ -9,6 +9,8 @@ import { Toast } from './components/ui/Toast';
 import { useStore } from './store/useStore';
 import { useHydrateStore } from './hooks/useHydrateStore';
 import { useI18n } from './i18n/useI18n';
+import { getCamera } from './lib/cameras';
+import { applyTheme, getTheme, applyDefaultTheme } from './lib/themes';
 
 enum Screen {
   Projects = 'projects',
@@ -32,6 +34,21 @@ export default function App() {
 
   const projects = useStore((s) => s.projects);
   const currentProjectId = useStore((s) => s.currentProjectId);
+  const currentProject = useStore((s) => s.currentProject());
+
+  // Appliquer le thème UI quand le projet change
+  useEffect(() => {
+    if (currentProject?.mode === 'simple' && currentProject.cameraId) {
+      const camera = getCamera(currentProject.cameraId);
+      if (camera) {
+        applyTheme(getTheme(camera.themeId));
+        return;
+      }
+    }
+    // Mode control ou pas de projet : thème par défaut
+    applyDefaultTheme();
+  }, [currentProject?.cameraId, currentProject?.mode]);
+
   const [screen, setScreen] = useState<Screen>(
     projects.length === 0 ? Screen.Projects : Screen.Camera
   );
@@ -41,7 +58,7 @@ export default function App() {
   const needsProject = currentProjectId === null && screen !== Screen.CreateProject;
 
   return (
-    <div className="h-full w-full relative bg-black overflow-hidden">
+    <div className="h-full w-full relative bg-vintage-bg overflow-hidden">
       {(screen === Screen.Projects || needsProject) && (
         <ProjectList
           onSelectProject={() => setScreen(Screen.Camera)}

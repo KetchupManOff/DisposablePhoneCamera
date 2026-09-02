@@ -1,3 +1,218 @@
+================================================================================
+  AI_CHANGELOG.txt — DisposablePhoneCamera (DispoCam)
+  Source unique de vérité pour suivre l'évolution du projet.
+================================================================================
+
+---
+2026-09-01 — Theme Background Overhaul v4 : arrière-plans distinctifs, fini le noir uniforme
+---
+
+Description :
+  Correction du nom « Lifocolor Rapid » → « Ilford Ilfocolor Rapid Retro Edition »
+  (marque correcte Ilford). Refonte complète des 13 fonds de thème pour les rendre
+  beaucoup plus distincts les uns des autres.
+
+  Problème précédent : tous les thèmes avaient des fonds quasi identiques
+  (luminance 3-7%, dans la plage #0C-#1C), ce qui rendait les thèmes impossibles
+  à distinguer sauf par leur couleur d'accent.
+
+  Changements :
+  - Fonds poussés à 8-15% de luminance — chaque thème a une teinte de fond
+    clairement identifiable (vert foncé pour Fuji, ambre pour Kodak, bleu acier
+    pour Ilford XP2, bordeaux pour Agfa, etc.)
+  - Surfaces et bordures significativement plus saturées (+40-70% de luminosité)
+  - Palette Classic par défaut également éclaircie (#15120C → #1A180E)
+  - Caméra renommée : id=lifocolor-rapid → ilford-ilfocolor-rapid,
+    label=Ilford Ilfocolor Rapid Retro Edition, manufacturer=Ilford
+
+  Comparaison bg avant → après par thème :
+  | Thème              | Avant    | Après    | Delta L |
+  |--------------------|----------|----------|---------|
+  | Classic (default)  | #15120C  | #1A180E  | +2%     |
+  | Fujifilm QuickSnap | #0C1A10  | #0A2610  | +3%     |
+  | Kodak FunSaver     | #1C1408  | #261A06  | +5%     |
+  | Lomo Simple Color  | #081C24  | #082430  | +2%     |
+  | Lomo B&W           | #0D0D0D  | #111111  | +2%     |
+  | Ilford HP5 Plus    | #1A1610  | #201A0E  | +3%     |
+  | Ilford XP2 Super   | #14181C  | #141E28  | +2%     |
+  | AgfaPhoto LeBox    | #1C0E10  | #280C0E  | +5%     |
+  | Kodak Tri-X 400    | #0C0C0C  | #0E0E0E  | +1%     |
+  | Polaroid 600       | #1C101A  | #241020  | +3%     |
+  | Instax Mini        | #1C1018  | #24101E  | +3%     |
+  | Instax Wide        | #0E1820  | #0E1C28  | +2%     |
+  | Ilfocolor Rapid    | #1C0E08  | #241006  | +4%     |
+
+Fichiers modifiés :
+  - src/lib/cameras.ts
+    Camera renommée : id, label, manufacturer, description, themeId
+
+  - src/lib/themes.ts
+    13 palettes entièrement retravaillées + palette Classic par défaut
+
+  - src/index.css
+    Tous les blocs [data-theme] et :root mis à jour. Fallback #15120C → #1A180E
+
+  - tailwind.config.js
+    Couleurs vintage de secours mises à jour
+
+  - index.html
+    <meta name="theme-color"> : #15120C → #1A180E
+
+  - vite.config.ts
+    manifest.theme_color + background_color : #15120C → #1A180E
+
+  - PROJECT_STATE.md
+    Documentation mise à jour (v4, nouveau nom de caméra, tableau des thèmes)
+
+  - AI_CHANGELOG.txt
+    Cette entrée
+
+Raison :
+  L'utilisateur a signalé que le nom « Lifocolor » était incorrect et devait être
+  « Ilford Ilfocolor Rapid Retro Edition ». Il a également noté qu'il y avait
+  « trop de noir » dans les thèmes et que la plupart des éléments restaient
+  presque identiques d'un thème à l'autre — les fonds étaient tous dans la
+  même plage de luminance très sombre, rendant les thèmes indiscernables.
+
+---
+2026-09-01 — Bold Theme Overhaul : couleurs vibrantes et identité visuelle affirmée
+---
+
+Description :
+  Refonte complète des 13 thèmes UI pour les rendre audacieux, invitants
+  et reconnaissables. Les anciens thèmes étaient trop sombres et subtils
+  (fond quasi noir, bordures à peine visibles, accents délavés).
+
+  Nouvelle philosophie :
+  - Fonds riches et saturés (plus de near-black fade)
+  - Accents vifs et vibrants qui sautent aux yeux
+  - Surfaces bien contrastées avec le fond
+  - Bordures plus épaisses et plus visibles
+  - Textes plus lumineux et plus contrastés
+  - Le viseur (cadre + crosshair + coins) est plus affirmé
+
+  Changements par caméra (comparaison accent avant → après) :
+  | Camera             | Avant      | Après     | Vibe             |
+  |--------------------|------------|-----------|------------------|
+  | Default (Classic)  | #c4a43e    | #E5B84C   | Or riche         |
+  | Fujifilm QuickSnap | #4CAF50    | #2ECC40   | Vert électrique  |
+  | Kodak FunSaver     | #FFC107    | #FFC107   | Jaune Kodak      |
+  | Lomo Simple Color  | #00BCD4    | #00E5FF   | Cyan électrique  |
+  | Lomo B&W           | #9e9e9e    | #C0C0C0   | Argent pur       |
+  | Ilford HP5 Plus    | #c4a44a    | #D4A84C   | Or chaud         |
+  | Ilford XP2 Super   | #7c8ca0    | #7C9CB8   | Acier chromé     |
+  | AgfaPhoto LeBox    | #E53935    | #FF3B30   | Rouge vif        |
+  | Kodak Tri-X 400    | #ff6d00    | #FF6D00   | Orange brûlant   |
+  | Polaroid 600       | #e84393    | #F06292   | Rose pop         |
+  | Instax Mini        | #EC407A    | #FF4081   | Rose bonbon      |
+  | Instax Wide        | #42A5F5    | #4FC3F7   | Bleu ciel         |
+  | Ilford Ilfocolor Rapid Retro | #FF9800    | #FF9800   | Orange chaud     |
+
+  Chaque thème a maintenant une identité immédiatement perceptible.
+
+Fichiers modifiés :
+  - src/lib/themes.ts
+    13 palettes complètement redessinées : fonds plus riches, accents plus
+    saturés, bordures plus marquées, textes plus lumineux.
+
+  - src/index.css
+    Tous les blocs [data-theme] et :root mis à jour avec les nouvelles
+    valeurs. Bordure du viseur épaissie (2px → 3px, 0.3 → 0.45).
+    Crosshair plus visible (0.5 → 0.7 opacity).
+    Fallback rgba() partout mis à jour vers la nouvelle palette Classic.
+
+  - tailwind.config.js
+    Animation pulseGlow utilise désormais var(--color-accent-rgb) au lieu
+    de valeurs RGB en dur (196,164,62 → var(--color-accent-rgb, 229,184,76)).
+    Intensité du glow augmentée : 0.4/0.8 → 0.5/0.9, 20px → 24px.
+
+  - src/components/camera/Viewfinder.tsx
+    Cadre doré : border-2 → border-[3px], opacity 40% → 45%.
+    Coins : w-4 h-4 → w-5 h-5, opacity 60% → 70%.
+
+  - index.html
+    <meta name="theme-color"> : #1a1a2e → #15120C (nouveau fond Classic).
+
+  - vite.config.ts
+    manifest.theme_color + background_color : #1a1a2e/#0f0f1a → #15120C.
+
+Raison :
+  L'utilisateur trouvait les thèmes trop « légers » (subtils, peu
+  reconnaissables) et souhaitait un style audacieux et invitant. Chaque
+  caméra a maintenant une identité visuelle qui saute aux yeux.
+---
+2026-09-01 — Système de thèmes UI basé sur les caméras jetables vintage
+---
+
+Description :
+  Ajout d'un système de thèmes visuels pour l'interface, chaque caméra simulée
+  ayant son propre thème de couleurs (fond, surface, bordures, texte, accent).
+  Les couleurs sont appliquées via des custom properties CSS et un attribut
+  `data-theme` sur l'élément `<html>`, changé dynamiquement quand l'utilisateur
+  sélectionne une caméra en mode "simple".
+
+  Ajout d'une nouvelle caméra : **Ilford Ilfocolor Rapid Retro Edition** (jetable
+  thème orange chaud, film Agfa Vista 400, 27 poses).
+
+  Tous les composants utilisent désormais `var(--color-*)` au lieu de couleurs
+  en dur : viseur (crosshair), molette (CrankWheel), tige de flash (FlashToggle).
+
+Fichiers créés :
+  - src/lib/themes.ts
+    Définit l'interface ThemeDefinition (id, label, colors avec accentRgb),
+    le thème par défaut DEFAULT_THEME, 13 thèmes (THEMES), la fonction
+    getTheme(), applyTheme() et applyDefaultTheme(). Utilitaire hexToRgb().
+
+Fichiers modifiés :
+  - src/lib/cameras.ts
+    + themeId: string dans CameraDefinition
+    + themeId ajouté à chaque caméra existante (11 entrées)
+    + Nouvelle caméra : Ilford Ilfocolor Rapid Retro Edition (id: ilford-ilfocolor-rapid, orange, 27 poses)
+
+  - src/App.tsx
+    + Import getCamera depuis ./lib/cameras
+    + Lecture de currentProject depuis le store
+    + useEffect qui écoute currentProject?.cameraId / mode
+    + Applique document.documentElement.setAttribute('data-theme', ...)
+
+  - tailwind.config.js
+    Couleurs vintage-* remplacées par var(--color-*, fallback) :
+      bg      → var(--color-bg, #0f0f1a)
+      surface → var(--color-surface, #1a1a2e)
+      border  → var(--color-border, #2d2d44)
+      text    → var(--color-text, #e8dcc8)
+      muted   → var(--color-muted, #8a8575)
+      accent  → var(--color-accent, #c4a43e)
+      danger  → var(--color-danger, #8b3a3a)
+
+  - src/index.css
+    + 14 blocs [data-theme="..."] définissant --color-bg, --color-surface,
+      --color-border, --color-text, --color-muted, --color-accent,
+      --color-accent-rgb, --color-danger pour chaque caméra + défaut.
+    + body/html background utilise var(--color-bg)
+    + .viewfinder-overlay::before : bordure via rgba(var(--color-accent-rgb), 0.3)
+    + .viewfinder-crosshair : fond via rgba(var(--color-accent-rgb), 0.5)
+
+  - src/components/camera/CrankWheel.tsx
+    + repeating-conic-gradient utilise var(--color-surface) et var(--color-bg)
+    + stroke SVG : var(--color-accent) au lieu de #c4a43e
+    + boxShadow repère : rgba(var(--color-accent-rgb), 0.9)
+
+  - src/components/camera/FlashToggle.tsx
+    + linear-gradient boîtier : var(--color-surface) → var(--color-bg)
+    + linear-gradient tige : var(--color-border) → var(--color-surface)
+    + boxShadow drag : rgba(var(--color-accent-rgb), 0.5)
+
+  - PROJECT_STATE.md : mis à jour avec les détails du système de thèmes
+  - AI_CHANGELOG.txt : cette entrée
+
+Raison :
+  L'utilisateur souhaitait des thèmes inspirés des vrais appareils jetables
+  (Fujifilm QuickSnap, Kodak FunSaver, Ilford Ilfocolor Rapid Retro, Kodak Tri-X, etc.)
+  pour renforcer l'immersion et donner à chaque caméra simulée une identité
+  visuelle unique.
+
+================================================================================
 # AI Changelog — Disposable Phone Camera
 
 ## 2026-09-01 — Add info button to main menu (roll list)

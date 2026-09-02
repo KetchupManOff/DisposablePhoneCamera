@@ -114,7 +114,7 @@ return (
         <div
           className="relative w-8 h-16 rounded-full border border-vintage-border/60 flex flex-col items-center justify-between py-1.5"
           style={{
-            background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)',
+            background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg) 100%)',
             boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.4)',
           }}
         >
@@ -142,9 +142,9 @@ return (
             `}
             style={{
               bottom: `${8 + progress * 36}px`,
-              background: 'linear-gradient(135deg, #3a3a5c 0%, #1a1a2e 100%)',
+              background: 'linear-gradient(135deg, var(--color-border) 0%, var(--color-surface) 100%)',
               boxShadow: dragging
-                ? '0 2px 10px rgba(196,164,62,0.5), inset 0 1px 3px rgba(255,255,255,0.1)'
+                ? '0 2px 10px rgba(var(--color-accent-rgb), 0.5), inset 0 1px 3px rgba(255,255,255,0.1)'
                 : '0 1px 4px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.08)',
               touchAction: 'none',
             }}

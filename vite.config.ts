@@ -48,8 +48,8 @@ export default defineConfig({
         short_name: 'DispoCam',
         description:
           "L'appareil photo jetable vintage dans votre poche. Prenez 24 poses, développez plus tard.",
-        theme_color: '#1a1a2e',
-        background_color: '#0f0f1a',
+        theme_color: '#1A180E',
+        background_color: '#1A180E',
         display: 'standalone',
         orientation: 'any',
         start_url: '/camera/',
