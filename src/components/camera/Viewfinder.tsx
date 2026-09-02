@@ -6,10 +6,12 @@ import { OrientationToggle } from './OrientationToggle';
 import { ShutterButton } from './ShutterButton';
 import { FilmCounter } from './FilmCounter';
 import { CrankWheel } from './CrankWheel';
+import { FlashToggle } from './FlashToggle';
 import { useColorProfile } from '../../hooks/useColorProfile';
 import { useVolumeCapture } from '../../hooks/useVolumeCapture';
 import { useLockTimer } from '../../hooks/useLockTimer';
 import { useShutterSound } from '../../hooks/useShutterSound';
+import { useFlash } from '../../hooks/useFlash';
 import { getCamera } from '../../lib/cameras';
 import { getEffectiveRatio, getRatioLabel } from '../../lib/ratio';
 import { useI18n } from '../../i18n/useI18n';
@@ -135,16 +137,24 @@ export function Viewfinder({
   onOpenAbout,
 }: ViewfinderProps) {
   const { t } = useI18n();
-  const { videoRef, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
+  const { videoRef, stream, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const updateCurrentProjectSettings = useStore((s) => s.updateCurrentProjectSettings);
+  const flashEnabled = useStore((s) => s.flashEnabled);
+  const setFlashEnabled = useStore((s) => s.setFlashEnabled);
   const { currentProfile } = useColorProfile();
   const camera = getCamera(currentProject?.cameraId ?? null);
   const [flash, setFlash] = useState(false);
   const [isCranked, setIsCranked] = useState(false);
   const previewAreaRef = useRef<HTMLDivElement>(null);
   const playShutter = useShutterSound();
+  const { torchAvailable, setTorch } = useFlash(stream);
+
+  // Synchroniser l'état store ↔ torche matérielle.
+  useEffect(() => {
+    setTorch(flashEnabled).catch(() => {});
+  }, [flashEnabled, setTorch]);
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const orientation = currentProject?.orientation ?? 'landscape';
@@ -354,6 +364,15 @@ export function Viewfinder({
         {/* Molette d'armement */}
         {canTakePhotos && (
           <CrankWheel isCocked={isCranked} onCocked={() => setIsCranked(true)} />
+        )}
+
+        {/* Tige de flash (tactile) */}
+        {canTakePhotos && (
+          <FlashToggle
+            enabled={flashEnabled}
+            onToggle={setFlashEnabled}
+            available={torchAvailable}
+          />
         )}
 
         {/* Déclencheur (grand bouton) */}

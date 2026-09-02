@@ -92,7 +92,7 @@ export function crankTick(): void {
   osc.stop(t + 0.06);
 }
 
-/** « Clac » final : le film est armé, on peut photographier. */
+/** « Clic » final : le film est armé, on peut photographier. */
 export function crankComplete(): void {
   vibrate([40, 30, 80]);
   const ctx = getAudioContext();
@@ -125,4 +125,83 @@ export function crankComplete(): void {
   oscGain.connect(ctx.destination);
   osc.start(t);
   osc.stop(t + 0.13);
+}
+
+/** Débloque le contexte audio pour les haptiques flash (appelé au premier contact). */
+export function primeFlashHaptics(): void {
+  getAudioContext();
+}
+
+/** « Pop » — activation du flash (tige tirée vers le haut). */
+export function flashToggleOn(): void {
+  vibrate([20, 30, 50]);
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+
+  // Son de claquement sec : « tchac » (tige qui sort).
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer(ctx, 0.03);
+  const band = ctx.createBiquadFilter();
+  band.type = 'bandpass';
+  band.frequency.setValueAtTime(3500, t);
+  band.Q.value = 2;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.35, t);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  noise.connect(band);
+  band.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noise.start(t);
+  noise.stop(t + 0.05);
+
+  // Tonalité montante (tige qui s'élève).
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, t);
+  osc.frequency.exponentialRampToValueAtTime(900, t + 0.06);
+  const oscGain = ctx.createGain();
+  oscGain.gain.setValueAtTime(0.12, t);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  osc.connect(oscGain);
+  oscGain.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + 0.1);
+}
+
+/** « Clac » — désactivation du flash (tige repoussée). */
+export function flashToggleOff(): void {
+  vibrate([15, 20]);
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+
+  // Son plus sourd : la tige rentre.
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer(ctx, 0.03);
+  const band = ctx.createBiquadFilter();
+  band.type = 'bandpass';
+  band.frequency.setValueAtTime(2000, t);
+  band.Q.value = 1.5;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.28, t);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  noise.connect(band);
+  band.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noise.start(t);
+  noise.stop(t + 0.05);
+
+  // Tonalité descendante (tige qui rentre).
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(900, t);
+  osc.frequency.exponentialRampToValueAtTime(500, t + 0.06);
+  const oscGain = ctx.createGain();
+  oscGain.gain.setValueAtTime(0.12, t);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  osc.connect(oscGain);
+  oscGain.connect(ctx.destination);
+  osc.start(t);
+  osc.stop(t + 0.1);
 }

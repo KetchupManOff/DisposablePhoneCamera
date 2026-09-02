@@ -5,6 +5,7 @@ import { PROFILES } from '../../lib/colorProfiles';
 import { getCamera } from '../../lib/cameras';
 import { useI18n } from '../../i18n/useI18n';
 import { LanguageToggle } from '../ui/LanguageToggle';
+import { WelcomeGuide } from '../ui/WelcomeGuide';
 import type { TFunction } from '../../i18n/translations';
 
 interface ProjectListProps {
@@ -40,6 +41,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
   const setCurrentProjectId = useStore((s) => s.setCurrentProjectId);
   const removeProject = useStore((s) => s.removeProject);
   const { t } = useI18n();
+  const [showInfo, setShowInfo] = useState(false);
 
   const [, forceUpdate] = useState(0);
   useEffect(() => {
@@ -53,6 +55,13 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
         <h2 className="text-lg font-display text-vintage-text">{t('projects.title')}</h2>
         <div className="flex items-center gap-2 shrink-0">
           <LanguageToggle />
+          <button
+            onClick={() => setShowInfo(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-vintage-border/40 text-vintage-muted hover:text-vintage-text hover:border-vintage-accent/50 transition-all text-sm"
+            title={t('projects.info')}
+          >
+            ℹ️
+          </button>
           <button
             onClick={onCreateNew}
             className="px-4 py-2 rounded-full bg-vintage-accent text-black font-mono text-sm hover:bg-vintage-accent/90 transition-all"
@@ -158,6 +167,7 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
           </div>
         )}
       </div>
+      {showInfo && <WelcomeGuide onClose={() => setShowInfo(false)} />}
     </div>
   );
 }

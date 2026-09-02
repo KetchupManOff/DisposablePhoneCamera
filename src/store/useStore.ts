@@ -27,6 +27,11 @@ interface AppState {
   flashTrigger: number;
   triggerFlash: () => void;
 
+  /* --- Flash / Torche --- */
+  flashEnabled: boolean;
+  toggleFlash: () => void;
+  setFlashEnabled: (enabled: boolean) => void;
+
   /* --- Langue --- */
   language: Lang;
   setLanguage: (language: Lang) => void;
@@ -143,6 +148,11 @@ export const useStore = create<AppState>((set, get) => ({
 
   flashTrigger: 0,
   triggerFlash: () => set({ flashTrigger: Date.now() }),
+
+  /* --- Flash / Torche --- */
+  flashEnabled: false,
+  toggleFlash: () => set((state) => ({ flashEnabled: !state.flashEnabled })),
+  setFlashEnabled: (enabled) => set({ flashEnabled: enabled }),
 
   language: 'fr',
   setLanguage: (language) => {

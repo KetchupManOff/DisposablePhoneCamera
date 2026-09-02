@@ -1,0 +1,42 @@
+# AI Changelog — Disposable Phone Camera
+
+## 2026-09-01 — Add info button to main menu (roll list)
+
+### Changes
+- **translations.ts**: Added `projects.info` translation key for both FR (`Infos`) and EN (`Info`) locales
+- **ProjectList.tsx**: Added an ℹ️ info button in the header bar (next to LanguageToggle) that opens the WelcomeGuide screen when clicked
+  - Added `WelcomeGuide` import
+  - Added `showInfo` state to toggle the guide overlay
+
+### Reason
+Users need quick access to the app guide / information (philosophy, usage steps, installation) directly from the main menu where they create and manage their rolls.
+
+### Files modified
+- `src/i18n/translations.ts`
+- `src/components/project/ProjectList.tsx`
+
+## 2026-08-30 — Fix npm audit vulnerabilities (esbuild dev-server advisory)
+
+### Changes
+- **package.json**: Bumped devDependencies to resolve GHSA-67mh-4wv8-2f99:
+  - `vite`: 5.4.14 → 6.4.3  (esbuild 0.21.5 → 0.25.12, patches the advisory)
+  - `@vitejs/plugin-react`: 4.3.4 → 5.2.0  (compatible with Vite 6)
+  - `vite-plugin-pwa`: 0.20.5 → 0.21.2  (compatible with Vite 6)
+- **package-lock.json**: Regenerated with clean install
+- **node_modules**: Clean reinstalled (0 vulnerabilities)
+
+### Reason
+The previous esbuild 0.21.5 had a moderate-severity dev-server-only vulnerability
+(GHSA-67mh-4wv8-2f99: "esbuild enables any website to send any requests to the
+development server and read the response"). npm audit flagged 3 alerts (2 moderate,
+1 high) through the chain esbuild → vite → vite-plugin-pwa. Upgrading to Vite 6.4.3+
+(the minimum that ships a patched esbuild > 0.24.2) resolves all three at once,
+staying within the Vite 6 stable line rather than jumping to Vite 7 or 8.
+
+- Build verified: tsc + vite build passes (73 modules, 7.81s)
+- PWA service worker and workbox runtime confirmed present in dist/
+- npm audit reports 0 vulnerabilities
+
+### Files modified
+- `package.json`
+- `package-lock.json`

@@ -112,6 +112,7 @@ const fr: Record<string, string> = {
   'projects.devTime.soon': 'Bientôt...',
   'projects.open': 'Ouvrir',
   'projects.active': 'Actif ✓',
+  'projects.info': 'Infos',
 
   /* --- Création d'une pellicule --- */
   'createProject.title': 'Nouvelle pellicule',
@@ -175,6 +176,12 @@ const fr: Record<string, string> = {
   'crank.armProgress': 'Armez : {detents}/{total}',
   'crank.armed': 'Armé ✓',
   'crank.arm': 'Armez ↻',
+
+  /* --- Flash --- */
+  'flash.aria': 'Tige de flash — tirez pour allumer',
+  'flash.on': 'ON ⚡',
+  'flash.off': 'OFF',
+  'flash.unavailable': 'N/D',
 
   /* --- Déclencheur --- */
   'shutter.empty': 'Rouleau vide',
@@ -365,6 +372,7 @@ export const en: Record<string, string> = {
   'projects.devTime.soon': 'Soon...',
   'projects.open': 'Open',
   'projects.active': 'Active ✓',
+  'projects.info': 'Info',
 
   /* --- Create project --- */
   'createProject.title': 'New roll',
@@ -428,6 +436,12 @@ export const en: Record<string, string> = {
   'crank.armProgress': 'Cock: {detents}/{total}',
   'crank.armed': 'Armed ✓',
   'crank.arm': 'Cock ↻',
+
+  /* --- Flash --- */
+  'flash.aria': 'Flash stem — pull to activate',
+  'flash.on': 'ON ⚡',
+  'flash.off': 'OFF',
+  'flash.unavailable': 'N/A',
 
   /* --- Shutter --- */
   'shutter.empty': 'Roll is empty',
