@@ -151,10 +151,9 @@ export function Viewfinder({
   const playShutter = useShutterSound();
   const { torchAvailable, setTorch } = useFlash(stream);
 
-  // Synchroniser l'état store ↔ torche matérielle.
-  useEffect(() => {
-    setTorch(flashEnabled).catch(() => {});
-  }, [flashEnabled, setTorch]);
+  // Flash torche : ne s'active QUE lors de la capture, comme un vrai flash
+  // d'appareil photo jetable. La tige tactile arme le flash ; le déclencheur
+  // l'active brièvement (pulse ~200 ms) au moment de la prise de vue.
 
   const aspectRatio = currentProject?.aspectRatio ?? '3:2';
   const orientation = currentProject?.orientation ?? 'landscape';
@@ -172,7 +171,17 @@ export function Viewfinder({
     if (!isReady) return;
     if (!isCranked) return;
 
-    // Flash de l'obturateur
+    // Flash torche matériel : pulse bref au moment de la capture
+    // (comme un vrai flash d'appareil photo jetable)
+    let torchUsed = false;
+    if (flashEnabled && torchAvailable) {
+      torchUsed = true;
+      await setTorch(true);
+      // Laisser le temps à la LED d'illuminer la scène (~200 ms)
+      await new Promise((r) => setTimeout(r, 200));
+    }
+
+    // Flash visuel de l'obturateur (overlay blanc à l'écran)
     setFlash(true);
     setTimeout(() => setFlash(false), 350);
 
@@ -184,7 +193,12 @@ export function Viewfinder({
     if (photo) {
       setIsCranked(false);
     }
-  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked, playShutter]);
+
+    // Éteindre la torche après capture
+    if (torchUsed) {
+      await setTorch(false);
+    }
+  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked, playShutter, flashEnabled, torchAvailable, setTorch]);
 
   const toggleOrientation = useCallback(() => {
     updateCurrentProjectSettings({

@@ -3,6 +3,22 @@
 ## 2026-09-01 — Add info button to main menu (roll list)
 
 ### Changes
+---
+2026-09-01 — Flash : comportement « real camera » (pulse au déclenchement, pas continu)
+---
+
+Description :
+  La tige de flash n'allume plus la torche en continu. Désormais, comme un vrai
+  flash d'appareil photo jetable, la tige ARME le flash, et la LED ne s'allume
+  que brièvement (~200 ms) au moment où l'utilisateur appuie sur le déclencheur.
+  La torche s'éteint immédiatement après la capture.
+
+Fichiers modifiés :
+  - src/components/camera/Viewfinder.tsx
+    Suppression du useEffect qui synchronisait flashEnabled → setTorch() en
+    continu. Dans handleCapture(), ajout d'un pulse torche avant/après la
+    capture : setTorch(true) → délai 200 ms → capture → setTorch(false).
+    Ajout de flashEnabled, torchAvailable, setTorch aux dépendances du callback.
 - **translations.ts**: Added `projects.info` translation key for both FR (`Infos`) and EN (`Info`) locales
 - **ProjectList.tsx**: Added an ℹ️ info button in the header bar (next to LanguageToggle) that opens the WelcomeGuide screen when clicked
   - Added `WelcomeGuide` import
