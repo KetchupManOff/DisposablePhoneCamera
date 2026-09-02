@@ -11,6 +11,7 @@ export default {
           text: 'var(--color-text, #F5ECD7)',
           muted: 'var(--color-muted, #A89570)',
           accent: 'var(--color-accent, #E5B84C)',
+          'accent-content': 'var(--color-accentContent, #1A180E)',
           danger: 'var(--color-danger, #D64045)',
         },
       },

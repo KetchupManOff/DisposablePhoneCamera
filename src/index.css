@@ -10,8 +10,10 @@
   --color-text: #F5ECD7;
   --color-muted: #A89570;
   --color-accent: #E5B84C;
+  --color-accentContent: #1A180E;
   --color-accent-rgb: 229, 184, 76;
   --color-danger: #D64045;
+  color-scheme: dark;
 }
 
 /* --- Fujifilm QuickSnap — Vert Fuji --- */
@@ -19,11 +21,13 @@
   --color-bg: #cce6d2;
   --color-surface: #a3d1ac;
   --color-border: #7abb85;
-  --color-text: #114a22;
-  --color-muted: #256d39;
+  --color-text: #0a3a1a;
+  --color-muted: #1e4d2b;
   --color-accent: #2ECC40;
+  --color-accentContent: #FFFFFF;
   --color-accent-rgb: 46, 204, 64;
   --color-danger: #E74C3C;
+  color-scheme: light;
 }
 
 /* --- Kodak FunSaver — Jaune/rouge chaud Kodak --- */
@@ -31,11 +35,13 @@
   --color-bg: #ffebb3;
   --color-surface: #ffda73;
   --color-border: #e6b939;
-  --color-text: #664900;
-  --color-muted: #997300;
+  --color-text: #4d3700;
+  --color-muted: #7a5700;
   --color-accent: #FF3B30;
+  --color-accentContent: #FFFFFF;
   --color-accent-rgb: 255, 59, 48;
   --color-danger: #E74C3C;
+  color-scheme: light;
 }
 
 /* --- Lomography Simple Use Color — Turquoise funky --- */
@@ -43,11 +49,13 @@
   --color-bg: #cceeff;
   --color-surface: #80ccff;
   --color-border: #33aaff;
-  --color-text: #004466;
-  --color-muted: #0077b3;
+  --color-text: #002a40;
+  --color-muted: #005280;
   --color-accent: #FF007F;
+  --color-accentContent: #FFFFFF;
   --color-accent-rgb: 255, 0, 127;
   --color-danger: #FF4081;
+  color-scheme: light;
 }
 
 /* --- Lomography Simple Use B&W — Monochrome --- */
@@ -55,11 +63,13 @@
   --color-bg: #e6e6e6;
   --color-surface: #cccccc;
   --color-border: #999999;
-  --color-text: #1a1a1a;
-  --color-muted: #4d4d4d;
+  --color-text: #0d0d0d;
+  --color-muted: #333333;
   --color-accent: #FF3B30;
+  --color-accentContent: #FFFFFF;
   --color-accent-rgb: 255, 59, 48;
   --color-danger: #FF5252;
+  color-scheme: light;
 }
 
 /* --- Ilford HP5 Plus — N&B classique --- */
@@ -67,11 +77,13 @@
   --color-bg: #d9e0d9;
   --color-surface: #a3b3a3;
   --color-border: #668066;
-  --color-text: #0f1a0f;
-  --color-muted: #2d4d2d;
-  --color-accent: #4CAF50;
-  --color-accent-rgb: 76, 175, 80;
-  --color-danger: #C0392B;
+  --color-text: #0a1a0a;
+  --color-muted: #2a4d2a;
+  --color-accent: #2d5a2d;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 45, 90, 45;
+  --color-danger: #D32F2F;
+  color-scheme: light;
 }
 
 /* --- Ilford XP2 Super — N&B chromogénique lisse --- */
@@ -79,11 +91,13 @@
   --color-bg: #e6d9e6;
   --color-surface: #c299c2;
   --color-border: #996699;
-  --color-text: #331a33;
-  --color-muted: #663366;
-  --color-accent: #9C27B0;
-  --color-accent-rgb: 156, 39, 176;
+  --color-text: #2a0a2a;
+  --color-muted: #4a1e4a;
+  --color-accent: #6A1B9A;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 106, 27, 154;
   --color-danger: #C0392B;
+  color-scheme: light;
 }
 
 /* --- AgfaPhoto LeBox — Rouge Agfa allemand --- */
@@ -91,11 +105,13 @@
   --color-bg: #ffd9d9;
   --color-surface: #ff9999;
   --color-border: #e64d4d;
-  --color-text: #660000;
-  --color-muted: #990000;
+  --color-text: #4d0000;
+  --color-muted: #800000;
   --color-accent: #000000;
+  --color-accentContent: #FFFFFF;
   --color-accent-rgb: 0, 0, 0;
   --color-danger: #D32F2F;
+  color-scheme: light;
 }
 
 /* --- Kodak Tri-X 400 — N&B dramatique --- */
@@ -104,10 +120,12 @@
   --color-surface: #d9d9d9;
   --color-border: #b3b3b3;
   --color-text: #000000;
-  --color-muted: #404040;
-  --color-accent: #FFEB3B;
-  --color-accent-rgb: 255, 235, 59;
+  --color-muted: #262626;
+  --color-accent: #bfae00;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 191, 174, 0;
   --color-danger: #E74C3C;
+  color-scheme: light;
 }
 
 /* --- Polaroid 600 — Arc-en-ciel rétro --- */
@@ -115,11 +133,13 @@
   --color-bg: #f0f4f8;
   --color-surface: #cfdbe8;
   --color-border: #a3bbd1;
-  --color-text: #1f3a52;
-  --color-muted: #3b6a94;
-  --color-accent: #F06292;
-  --color-accent-rgb: 240, 98, 146;
+  --color-text: #0d1a26;
+  --color-muted: #264563;
+  --color-accent: #D81B60;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 216, 27, 96;
   --color-danger: #EF5350;
+  color-scheme: light;
 }
 
 /* --- Fujifilm Instax Mini — Pastel rose --- */
@@ -127,11 +147,13 @@
   --color-bg: #ffe6f2;
   --color-surface: #ffb3d9;
   --color-border: #ff66b3;
-  --color-text: #660033;
-  --color-muted: #b30059;
-  --color-accent: #00BCD4;
-  --color-accent-rgb: 0, 188, 212;
+  --color-text: #4d0026;
+  --color-muted: #800040;
+  --color-accent: #00838F;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 0, 131, 143;
   --color-danger: #E53935;
+  color-scheme: light;
 }
 
 /* --- Fujifilm Instax Wide — Pastel bleu ciel --- */
@@ -139,11 +161,13 @@
   --color-bg: #e6f7ff;
   --color-surface: #99dcff;
   --color-border: #33bbff;
-  --color-text: #00334d;
-  --color-muted: #006699;
-  --color-accent: #FF9800;
-  --color-accent-rgb: 255, 152, 0;
+  --color-text: #002233;
+  --color-muted: #004466;
+  --color-accent: #E65100;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 230, 81, 0;
   --color-danger: #EF5350;
+  color-scheme: light;
 }
 
 /* --- Ilford Ilfocolor Rapid Retro Edition — Orange chaud / rétro --- */
@@ -151,11 +175,13 @@
   --color-bg: #ffe6cc;
   --color-surface: #ffb366;
   --color-border: #e68a00;
-  --color-text: #663d00;
-  --color-muted: #995c00;
-  --color-accent: #2196F3;
-  --color-accent-rgb: 33, 150, 243;
+  --color-text: #331f00;
+  --color-muted: #663d00;
+  --color-accent: #0D47A1;
+  --color-accentContent: #FFFFFF;
+  --color-accent-rgb: 13, 71, 161;
   --color-danger: #E53935;
+  color-scheme: light;
 }
 
 /* --- Base reset for mobile camera app --- */
