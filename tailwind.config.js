@@ -5,13 +5,13 @@ export default {
     extend: {
       colors: {
         vintage: {
-          bg: 'var(--color-bg)',
-          surface: 'var(--color-surface)',
-          border: 'var(--color-border)',
-          text: 'var(--color-text)',
-          muted: 'var(--color-muted)',
-          accent: 'var(--color-accent)',
-          danger: 'var(--color-danger)',
+          bg: 'var(--color-bg, #1A180E)',
+          surface: 'var(--color-surface, #2C2818)',
+          border: 'var(--color-border, #4A4028)',
+          text: 'var(--color-text, #F5ECD7)',
+          muted: 'var(--color-muted, #A89570)',
+          accent: 'var(--color-accent, #E5B84C)',
+          danger: 'var(--color-danger, #D64045)',
         },
       },
       fontFamily: {
