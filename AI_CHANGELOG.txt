@@ -214,6 +214,102 @@ Raison :
 
 ================================================================================
 # AI Changelog — Disposable Phone Camera
+### Files modified
+- `src/i18n/translations.ts`
+- `src/components/project/ProjectList.tsx`
+- 2026-09-02 — Pipeline Hybride : alignement complet avec refs/aboutTheCameras.md
+---
+Description :
+  Refonte majeure du système de simulation photographique pour respecter
+  strictement le document de référence. Migration de l'ancien système
+  simplifié (brightness/contrast/saturation/warmth) vers le Pipeline Hybride
+  en 5 étapes.
+
+  Phase 1 — Nouvelles structures de données :
+    - src/lib/filmProfiles.ts (NOUVEAU)
+      9 profils de film avec paramètres physico-chimiques réels :
+      ISO, grain_intensity, contrast_multiplier, saturation_multiplier,
+      temperature_shift_kelvin, rgb_black_point, rgb_white_point, color_bias.
+      Profils : fujicolor_superia_400, kodak_gold_800, ilfocolor_400,
+      lomo_color_400, agfa_color_400, polaroid_600_color, instax_color,
+      kodak_trix_400, ilford_hp5_400, ilford_xp2_400, lomo_lady_grey_400.
+
+    - src/lib/borderPresets.ts (NOUVEAU)
+      7 presets de bordure avec marges en pourcentage :
+      polaroid_classic, top_bottom_heavy, slim, wide_gallery,
+      retro_asymmetric, instax_mini, instax_wide.
+      Exporte BORDER_PRESETS, BORDER_PRESETS_MAP, getBorderPreset(),
+      NO_BORDER_ID.
+
+  Phase 2 — Pipeline d'image (src/lib/imageProcessor.ts, réécriture) :
+    Étape 1 : Balance des blancs Kelvin (applyKelvinShift)
+      Décalage R/B proportionnel au delta Kelvin, référence 6500K.
+    Étape 2 : Courbe de ton sigmoïde + Black/White Points
+      applyBlackWhitePoints : remap [bp, wp] → [0, 255]
+      applySigmoidCurve : fonction sigmoïde avec toe/shoulder pilotée
+      par contrast_multiplier.
+    Étape 3 : Altération des canaux de couleur
+      applySaturation : multiplicateur de saturation (0 = N&B)
+      applyColorBias : 8 biais colorimétriques (green-cyan, yellow-red,
+      vintage-warm, magenta-shift, muted-reds, pastel-milky, cold-punchy,
+      none) avec multiplicateurs et offsets par canal.
+    Étape 4 : Grain procédural (addProceduralGrain)
+      Hash 2D déterministe (hash2D) remplaçant Math.random().
+      Modulation par luminance : max dans les tons moyens, nul dans les blancs.
+    Étape 5a : Vignettage radial (vignetteFactor)
+      Force adaptative selon type de film (monochrome 0.45, instant 0.20,
+      couleur 0.35).
+    Étape 5b : Halation (applyHalation)
+      Halo chaud (R+G) autour des pixels > 220 de luminance.
+      Plus prononcé sur les films couleur que instantanés.
+    Nouvelle fonction exportée : applyFilmProfile(imageData, FilmProfile)
+    Nouvelles bordures : addBorder(dataUrl, BorderPreset), addBorderById()
+
+    Compatibilité conservée :
+      - applyProfile() → version autonome (n'utilise plus les helpers supprimés)
+      - addPolaroidBorder() → inchangé
+      - captureFrame() → inchangé
+
+  Phase 3 — Intégration :
+    src/lib/cameras.ts :
+      - CameraDefinition : +filmProfileId (FilmProfileId), +Force_Frame (string|false)
+      - Toutes les 12 caméras mappées vers leur filmProfileId
+      - Force_Frame : polaroid_classic (Polaroid), instax_mini/wide (Instax),
+        false pour les 9 autres
+      - Nouvelle fonction : getCameraFilmProfileId()
+
+    src/types.ts :
+      - Project : +filmProfileId?:string|null, +borderPresetId?:string|null
+
+    src/hooks/useFilmRoll.ts :
+      - Résolution intelligente : filmProfileId du projet → filmProfileId
+        de la caméra → fallback ancien colorProfile
+      - Nouveaux projets utilisent applyFilmProfile (pipeline hybride)
+      - Anciens projets utilisent applyProfile (compat)
+
+  Phase 4 — Nettoyage :
+    - src/lib/colorProfiles.ts : conservé pour rétrocompatibilité
+    - src/lib/borderPresets.ts : nouveau fichier de référence
+
+  Vérification :
+    - tsc --noEmit : 0 erreur
+    - vite build : 79 modules, build OK, PWA OK
+
+  Raison :
+    Le document refs/aboutTheCameras.md définit les paramètres de simulation
+    exacts et le pipeline recommandé. L'ancien système simplifié ne respectait
+    pas la courbe sigmoïde, les points noir/blanc, le grain procédural modulé
+    par luminance, l'halation, ni les presets de bordure normalisés.
+    Cette mise à jour aligne complètement le code sur la spécification.
+
+  Fichiers modifiés :
+    - src/lib/filmProfiles.ts (NOUVEAU)
+    - src/lib/borderPresets.ts (NOUVEAU)
+    - src/lib/imageProcessor.ts (réécriture complète)
+    - src/lib/cameras.ts (+filmProfileId, +Force_Frame, +getCameraFilmProfileId)
+    - src/types.ts (+filmProfileId, +borderPresetId)
+    - src/hooks/useFilmRoll.ts (résolution filmProfileId + nouveau pipeline)
+    - AI_CHANGELOG.txt (cette entrée)
 
 ## 2026-09-01 — Add info button to main menu (roll list)
 

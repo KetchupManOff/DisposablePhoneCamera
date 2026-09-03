@@ -4,8 +4,10 @@ import { encrypt } from '../lib/crypto';
 import { useStore } from '../store/useStore';
 import type { CapturedPhoto } from '../types';
 import { PROFILES } from '../lib/colorProfiles';
-import { applyProfile, captureFrame } from '../lib/imageProcessor';
+import { getFilmProfile } from '../lib/filmProfiles';
+import { applyProfile, applyFilmProfile, captureFrame } from '../lib/imageProcessor';
 import { getEffectiveRatio } from '../lib/ratio';
+import { getCameraFilmProfileId } from '../lib/cameras';
 
 interface UseFilmRollReturn {
   /** Capture une photo depuis le stream vidéo et la stocke */
@@ -65,9 +67,30 @@ export function useFilmRoll(): UseFilmRollReturn {
         frameCanvas.height,
       );
 
-      // 3. Appliquer le profil couleur
-      const profile = PROFILES[currentProject.colorProfile];
-      const processedCanvas = applyProfile(imageData, profile);
+      // 3. Appliquer le profil film (pipeline hybride ou ancien système)
+      //    2026-09-02 — Priorité au filmProfileId (nouveau pipeline),
+      //    fallback sur l'ancien colorProfile pour rétrocompatibilité.
+      let processedCanvas: HTMLCanvasElement;
+
+      const filmProfileId =
+        currentProject.filmProfileId ??
+        getCameraFilmProfileId(currentProject.cameraId);
+
+      if (filmProfileId) {
+        const filmProfile = getFilmProfile(filmProfileId);
+        if (filmProfile) {
+          // Pipeline hybride 5 étapes (refs/aboutTheCameras.md)
+          processedCanvas = applyFilmProfile(imageData, filmProfile);
+        } else {
+          // Fallback ancien système
+          const legacyProfile = PROFILES[currentProject.colorProfile];
+          processedCanvas = applyProfile(imageData, legacyProfile);
+        }
+      } else {
+        // Projet ancien sans filmProfileId → ancien système
+        const legacyProfile = PROFILES[currentProject.colorProfile];
+        processedCanvas = applyProfile(imageData, legacyProfile);
+      }
 
       // 4. Convertir en dataURL
       const dataUrl = processedCanvas.toDataURL('image/jpeg', 0.85);

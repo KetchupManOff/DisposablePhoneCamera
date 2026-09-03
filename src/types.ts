@@ -45,4 +45,12 @@ export interface Project {
   unlockAt: number | null;
   createdAt: number;
   isUnlocked: boolean;
+  /**
+   * 2026-09-02 — Nouveaux champs pour le pipeline hybride
+   * (basés sur refs/aboutTheCameras.md)
+   */
+  /** ID du profil film (ex: "fujicolor_superia_400"). Null = rétrocompatibilité avec l'ancien système. */
+  filmProfileId?: string | null;
+  /** ID du preset de bordure. "__none__" = pas de bordure. Null = non défini, utilise le Force_Frame de la caméra. */
+  borderPresetId?: string | null;
 }
