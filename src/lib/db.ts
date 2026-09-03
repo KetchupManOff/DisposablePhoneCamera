@@ -23,6 +23,9 @@ export interface StoredProject {
   unlockAt: number | null;
   createdAt: number;
   isUnlocked: boolean;
+  /** 2026-09-02 — Pipeline hybride */
+  filmProfileId?: string | null;
+  borderPresetId?: string | null;
 }
 
 const db = new Dexie('DisposablePhoneCameraDB') as Dexie & {

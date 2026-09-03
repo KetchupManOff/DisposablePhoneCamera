@@ -55,6 +55,9 @@ export function useHydrateStore(): void {
           unlockAt: sp.unlockAt,
           createdAt: sp.createdAt,
           isUnlocked: sp.isUnlocked,
+          // 2026-09-02 — Pipeline hybride (optionnels)
+          filmProfileId: sp.filmProfileId ?? null,
+          borderPresetId: sp.borderPresetId ?? null,
         }));
 
         if (!cancelled) {

@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { db } from '../../lib/db';
 import { PROFILES } from '../../lib/colorProfiles';
 import { CAMERAS, getCamera } from '../../lib/cameras';
+import { BORDER_PRESETS, NO_BORDER_ID } from '../../lib/borderPresets';
 import { useI18n } from '../../i18n/useI18n';
 import type { Project, AspectRatio, ColorProfile, ProjectMode } from '../../types';
 
@@ -60,6 +61,9 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('3:2');
   const [maxPoses, setMaxPoses] = useState(24);
 
+  // 2026-09-02 — Cadre photo (border preset). null = aucun choix explicite.
+  const [borderPresetId, setBorderPresetId] = useState<string | null>(NO_BORDER_ID);
+
   const [takingMinutes, setTakingMinutes] = useState(0);
   const [takingCustomH, setTakingCustomH] = useState('1');
   const [takingCustomM, setTakingCustomM] = useState('0');
@@ -68,6 +72,14 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
   const [devCustomM, setDevCustomM] = useState('0');
 
   const camera = useMemo(() => getCamera(cameraId), [cameraId]);
+
+  // 2026-09-02 — Politique de cadre (Force_Frame) de la caméra sélectionnée.
+  const forceFrame = camera?.Force_Frame ?? false;
+  // Cadre effectivement appliqué : imposé par la caméra ou choisi librement.
+  const effectiveBorderId: string | null =
+    mode === 'simple' && typeof forceFrame === 'string'
+      ? forceFrame
+      : borderPresetId;
 
   // Valeurs résolues selon le mode.
   const resolvedProfile: ColorProfile =
@@ -127,6 +139,10 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
       unlockAt,
       createdAt: now,
       isUnlocked: unlockAt === null,
+      // 2026-09-02 — Pipeline hybride
+      filmProfileId:
+        mode === 'simple' && camera ? camera.filmProfileId : null,
+      borderPresetId: effectiveBorderId,
     };
 
     await db.projects.put({
@@ -142,6 +158,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
       unlockAt: project.unlockAt,
       createdAt: project.createdAt,
       isUnlocked: project.isUnlocked,
+      filmProfileId: project.filmProfileId,
+      borderPresetId: project.borderPresetId,
     });
 
     addProject(project);
@@ -155,6 +173,8 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
     resolvedPoses,
     takingMinutes,
     devOption,
+    effectiveBorderId,
+    camera,
     addProject,
     onCreated,
   ]);
@@ -362,6 +382,84 @@ export function CreateProject({ onCreated, onCancel }: CreateProjectProps) {
         </div>
           </>
         )}
+        {/* 2026-09-02 — Cadre photo (Force_Frame) */}
+        {(() => {
+          const isForced = mode === 'simple' && typeof forceFrame === 'string';
+          if (isForced) {
+            const imposed = BORDER_PRESETS.find((p) => p.id === forceFrame);
+            return (
+              <div>
+                <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
+                  {t('createProject.border')}
+                </p>
+                <div className="p-3 rounded-xl bg-vintage-surface/30 border border-vintage-border/20 space-y-1">
+                  <p className="text-sm text-vintage-text flex items-center gap-2">
+                    <span>🖼️</span> {imposed?.name ?? forceFrame}
+                  </p>
+                  <p className="text-xs text-vintage-muted">
+                    {t('createProject.borderImposed')}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div>
+              <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">
+                {t('createProject.border')}
+              </p>
+              <p className="text-xs text-vintage-muted mb-2">
+                {t('createProject.borderFree')}
+              </p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setBorderPresetId(NO_BORDER_ID)}
+                  className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
+                    borderPresetId === NO_BORDER_ID || borderPresetId === null
+                      ? 'border-vintage-accent bg-vintage-accent/10'
+                      : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">🚫</span>
+                    <div>
+                      <p className="font-display text-vintage-text text-sm">
+                        {t('createProject.borderNone')}
+                      </p>
+                    </div>
+                    {(borderPresetId === NO_BORDER_ID || borderPresetId === null) && (
+                      <span className="ml-auto text-vintage-accent">✓</span>
+                    )}
+                  </div>
+                </button>
+                {BORDER_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setBorderPresetId(preset.id)}
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
+                      borderPresetId === preset.id
+                        ? 'border-vintage-accent bg-vintage-accent/10'
+                        : 'border-vintage-border/30 bg-vintage-surface/20 hover:border-vintage-border/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">🖼️</span>
+                      <div>
+                        <p className="font-display text-vintage-text text-sm">{preset.name}</p>
+                        <p className="text-xs text-vintage-muted">{preset.description}</p>
+                      </div>
+                      {borderPresetId === preset.id && (
+                        <span className="ml-auto text-vintage-accent">✓</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+
 {/* Fenêtre de prise de vue */}
         <div>
           <p className="text-xs font-mono text-vintage-muted mb-3 uppercase tracking-wider">

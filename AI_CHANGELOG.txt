@@ -4,6 +4,50 @@
 ================================================================================
 
 ---
+==============================================================================
+  2026-09-02 — Sélecteur de cadre photo dans la création de rouleau (Force_Frame UI)
+==============================================================================
+
+Description :
+  Ajout de l'interface de sélection du cadre photo dans le menu de
+  configuration du rouleau (écran "Nouvelle pellicule"), conformément à la
+  règle Force_Frame du document refs/aboutTheCameras.md.
+
+  Comportement :
+  - Caméra avec Force_Frame = "polaroid_classic" / "instax_mini" / "instax_wide"
+    → le cadre est imposé : un panneau verrouillé affiche le nom du cadre
+      ("Cadre imposé par la caméra — non modifiable"). Pas de choix.
+  - Caméra avec Force_Frame = false (les 9 autres) ou mode "Control freak"
+    → un sélecteur libre liste "Aucun cadre" + les 7 presets
+      (polaroid_classic, top_bottom_heavy, slim, wide_gallery,
+       retro_asymmetric, instax_mini, instax_wide) avec nom + description.
+  - Le choix est persistant : stocké dans Project.borderPresetId et IndexedDB.
+
+  Application à la capture :
+  - useFilmRoll.ts résout la bordure effective : Force_Frame (string) prime,
+    sinon Project.borderPresetId. La bordure est appliquée via addBorderById()
+    (marges en % de la plus petite dimension) après le pipeline film.
+
+  Fichiers modifiés :
+  - src/components/project/CreateProject.tsx
+    + état borderPresetId, calcul forceFrame/effectiveBorderId,
+      section UI "Cadre photo" (imposé ou sélecteur), persistance
+      filmProfileId + borderPresetId dans le projet et db.
+  - src/hooks/useFilmRoll.ts
+    + import addBorderById + getCamera ; étape 4b applique la bordure.
+  - src/lib/db.ts (+filmProfileId, +borderPresetId sur StoredProject)
+  - src/hooks/useHydrateStore.ts (restaure filmProfileId + borderPresetId)
+  - src/i18n/translations.ts
+    + createProject.border, borderFree, borderNone, borderImposed (FR/EN)
+
+  Raison :
+    L'utilisateur ne trouvait pas où choisir la bordure des photos dans le
+    menu de configuration du rouleau. La règle Force_Frame n'était pas
+    exposée dans l'UI.
+
+---
+
+
 2026-09-01 — Theme Background Overhaul v4 : arrière-plans distinctifs, fini le noir uniforme
 ---
 

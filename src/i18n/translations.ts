@@ -130,6 +130,10 @@ const fr: Record<string, string> = {
   'createProject.poses': 'Poses',
   'createProject.fixedByCamera':
     'Le ratio et le film suivent la vraie caméra — non modifiables ici.',
+  'createProject.border': '🖼️ Cadre photo',
+  'createProject.borderFree': 'Choisissez le cadre de vos photos (facultatif)',
+  'createProject.borderNone': 'Aucun cadre',
+  'createProject.borderImposed': 'Cadre imposé par la caméra — non modifiable',
   'createProject.filmLut': 'Film (LUT)',
   'createProject.ratioSquare': 'Carré — style Polaroid',
   'createProject.ratioClassic': 'Classique 35 mm',
@@ -390,6 +394,10 @@ export const en: Record<string, string> = {
   'createProject.poses': 'Exposures',
   'createProject.fixedByCamera':
     'The ratio and film follow the real camera — not editable here.',
+  'createProject.border': '🖼️ Photo frame',
+  'createProject.borderFree': 'Choose the frame for your photos (optional)',
+  'createProject.borderNone': 'No frame',
+  'createProject.borderImposed': 'Frame imposed by the camera — not editable',
   'createProject.filmLut': 'Film (LUT)',
   'createProject.ratioSquare': 'Square — Polaroid style',
   'createProject.ratioClassic': 'Classic 35 mm',

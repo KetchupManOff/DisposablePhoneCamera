@@ -5,9 +5,9 @@ import { useStore } from '../store/useStore';
 import type { CapturedPhoto } from '../types';
 import { PROFILES } from '../lib/colorProfiles';
 import { getFilmProfile } from '../lib/filmProfiles';
-import { applyProfile, applyFilmProfile, captureFrame } from '../lib/imageProcessor';
+import { applyProfile, applyFilmProfile, addBorderById, captureFrame } from '../lib/imageProcessor';
 import { getEffectiveRatio } from '../lib/ratio';
-import { getCameraFilmProfileId } from '../lib/cameras';
+import { getCamera, getCameraFilmProfileId } from '../lib/cameras';
 
 interface UseFilmRollReturn {
   /** Capture une photo depuis le stream vidéo et la stocke */
@@ -95,8 +95,20 @@ export function useFilmRoll(): UseFilmRollReturn {
       // 4. Convertir en dataURL
       const dataUrl = processedCanvas.toDataURL('image/jpeg', 0.85);
 
+      // 4b. 2026-09-02 — Appliquer la bordure (Force_Frame ou choix utilisateur)
+      let finalDataUrl = dataUrl;
+      const camera = getCamera(currentProject.cameraId);
+      const forcedFrame = camera?.Force_Frame;
+      const borderId =
+        typeof forcedFrame === 'string'
+          ? forcedFrame
+          : currentProject.borderPresetId ?? null;
+      if (borderId && borderId !== '__none__') {
+        finalDataUrl = await addBorderById(dataUrl, borderId);
+      }
+
       // 5. Chiffrer (obfuscation)
-      const encrypted = encrypt(dataUrl);
+      const encrypted = encrypt(finalDataUrl);
 
       // 6. Construire l'objet photo
       const photo: CapturedPhoto = {
