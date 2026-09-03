@@ -172,18 +172,17 @@ export function applyFilmProfile(imageData: ImageData, profile: FilmProfile): HT
 // Fonctions de bordure (basées sur les presets)
 // ═══════════════════════════════════════════════════════════
 
-export function addBorder(dataUrl: string, preset: BorderPreset): Promise<string> {
+export function addBorder(dataUrl: string, preset: BorderPreset, isLandscape = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       const iW = img.naturalWidth, iH = img.naturalHeight;
-      const isLandscape = iW > iH;
       const ms = Math.min(iW, iH), m = preset.margins_percent;
 
-      // 2026-09-02 — Rotation des marges selon l'orientation de l'image.
+      // 2026-09-02 — Rotation des marges selon l'orientation du projet.
       // Un vrai tirage Polaroid/Instax ne tourne pas : quand l'appareil est
       // tenu en paysage, la bordure large du bas devient la bordure droite.
-      // Formule : rotation 90° horaire des marges quand w > h.
+      // Formule : rotation 90° horaire des marges quand isLandscape.
       //   preset.top    → left
       //   preset.bottom → right
       //   preset.left   → top
@@ -205,11 +204,11 @@ export function addBorder(dataUrl: string, preset: BorderPreset): Promise<string
   });
 }
 
-export async function addBorderById(dataUrl: string, presetId: string | null): Promise<string> {
+export async function addBorderById(dataUrl: string, presetId: string | null, isLandscape = false): Promise<string> {
   if (!presetId || presetId === '__none__') return dataUrl;
   const { getBorderPreset } = await import('./borderPresets');
   const preset = getBorderPreset(presetId);
-  return preset ? addBorder(dataUrl, preset) : dataUrl;
+  return preset ? addBorder(dataUrl, preset, isLandscape) : dataUrl;
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -103,8 +103,9 @@ export function useFilmRoll(): UseFilmRollReturn {
         typeof forcedFrame === 'string'
           ? forcedFrame
           : currentProject.borderPresetId ?? null;
+      const isLandscape = (currentProject.orientation ?? 'landscape') === 'landscape';
       if (borderId && borderId !== '__none__') {
-        finalDataUrl = await addBorderById(dataUrl, borderId);
+        finalDataUrl = await addBorderById(dataUrl, borderId, isLandscape);
       }
 
       // 5. Chiffrer (obfuscation)
