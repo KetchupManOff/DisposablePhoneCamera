@@ -303,55 +303,10 @@ export function captureFrame(
 }
 
 /**
- * Adds a Polaroid-style white border to an image data URL.
- * The original photo stays intact — the border is rendered onto a new canvas.
+ * 2026-09-02 — Ancienne fonction de bordure Polaroid supprimée.
  *
- * The paper is a physical rectangle that doesn't rotate:
- *   - Portrait images: wider border at the bottom (classic Polaroid look)
- *   - Landscape images: wider border on the right side (paper turned sideways)
- *
- * Proportions:
- *   - Thin borders: 8% of the shortest image side
- *   - Thick border: 20% of the shortest image side
- *   - White (#fafaf5) background with a very subtle warm tint
+ * La bordure est désormais appliquée UNIQUEMENT à la capture via
+ * `addBorder()` / `addBorderById()` (presets de `borderPresets.ts`).
+ * L'ancienne logique « bordure droite épaisse en paysage » (addPolaroidBorder)
+ * provoquait une double application de bordure à l'export.
  */
-export function addPolaroidBorder(dataUrl: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const imgW = img.naturalWidth;
-      const imgH = img.naturalHeight;
-      const minSide = Math.min(imgW, imgH);
-
-      const thinBorder = Math.round(minSide * 0.08);
-      const thickBorder = Math.round(minSide * 0.20);
-
-      const isPortrait = imgH > imgW;
-
-      // Canvas dimensions: paper doesn't rotate, so the thick side
-      // is at the bottom (portrait) or on the right (landscape).
-      const canvasW = isPortrait
-        ? imgW + thinBorder * 2            // thin left + thin right
-        : imgW + thinBorder + thickBorder; // thin left + thick right
-      const canvasH = isPortrait
-        ? imgH + thinBorder + thickBorder  // thin top + thick bottom
-        : imgH + thinBorder * 2;           // thin top + thin bottom
-
-      const canvas = document.createElement('canvas');
-      canvas.width = canvasW;
-      canvas.height = canvasH;
-      const ctx = canvas.getContext('2d')!;
-
-      // White background (slightly warm, like real Polaroid paper)
-      ctx.fillStyle = '#fafaf5';
-      ctx.fillRect(0, 0, canvasW, canvasH);
-
-      // Draw the image anchored at top-left with thin borders on top and left
-      ctx.drawImage(img, thinBorder, thinBorder, imgW, imgH);
-
-      resolve(canvas.toDataURL('image/jpeg', 0.92));
-    };
-    img.onerror = () => reject(new Error('Failed to load image for polaroid border'));
-    img.src = dataUrl;
-  });
-}

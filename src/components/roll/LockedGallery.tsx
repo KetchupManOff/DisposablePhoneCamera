@@ -4,7 +4,6 @@ import { useLockTimer } from '../../hooks/useLockTimer';
 import { db } from '../../lib/db';
 import { decrypt } from '../../lib/crypto';
 import { savePhotoToDevice, savePhotosToDevice } from '../../lib/saveToDevice';
-import { addPolaroidBorder } from '../../lib/imageProcessor';
 import { useI18n } from '../../i18n/useI18n';
 
 interface LockedGalleryProps {
@@ -49,9 +48,9 @@ function PrintCard({
         return;
       }
       const decrypted = decrypt(stored.dataUrl);
-      const polaroid = await addPolaroidBorder(decrypted);
+      // 2026-09-02 — La bordure est déjà appliquée à la capture via addBorderById().
       const filename = `DispoCam-${dateStr.replace(' ', '-')}-${timeStr.replace(':', 'h')}.jpg`;
-      const success = await savePhotoToDevice(polaroid, filename);
+      const success = await savePhotoToDevice(decrypted, filename);
       if (success) {
         onSave(photoId);
       }
@@ -377,8 +376,8 @@ function SimpleGallery({
         const stored = await db.photos.get(photos[i].id);
         if (stored) {
           const decrypted = decrypt(stored.dataUrl);
-          const polaroid = await addPolaroidBorder(decrypted);
-          items.push({ dataUrl: polaroid, filename: `DispoCam-${i + 1}.jpg` });
+          // 2026-09-02 — La bordure est déjà appliquée à la capture.
+          items.push({ dataUrl: decrypted, filename: `DispoCam-${i + 1}.jpg` });
         }
       }
       const ok = await savePhotosToDevice(items);
@@ -548,8 +547,8 @@ export function LockedGallery({ isOpen, onClose }: LockedGalleryProps) {
     const stored = await db.photos.get(photoId);
     if (!stored) return;
     const decrypted = decrypt(stored.dataUrl);
-    const polaroid = await addPolaroidBorder(decrypted);
-    await savePhotoToDevice(polaroid, `DispoCam-${photoId.slice(0, 8)}.jpg`);
+    // 2026-09-02 — La bordure est déjà appliquée à la capture.
+    await savePhotoToDevice(decrypted, `DispoCam-${photoId.slice(0, 8)}.jpg`);
   }, []);
 
   if (!isOpen) return null;

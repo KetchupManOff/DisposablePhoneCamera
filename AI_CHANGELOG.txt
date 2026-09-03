@@ -5,6 +5,47 @@
 
 ---
 ==============================================================================
+  2026-09-02 — Suppression de la double application de bordure (addPolaroidBorder)
+==============================================================================
+
+Description :
+  Correction d'un bug de double bordure : les photos recevaient une
+  première bordure (correcte) au moment de la capture via addBorderById(),
+  puis une DEUXIÈME bordure (l'ancien comportement polaroid) au moment
+  de l'export/enregistrement dans la galerie.
+
+  Problème :
+  - addPolaroidBorder() ajoutait une bordure droite épaisse en paysage
+    (8% côtés, 20% droite/bas selon orientation), même si l'utilisateur
+    avait choisi un preset différent (ex: "Bordures Larges/Galerie" uniforme,
+    ou "Bandes Haut & Bas").
+  - Résultat : deux scripts travaillaient en parallèle, produisant une
+    bordure droite toujours plus épaisse quel que soit le preset choisi.
+
+  Correction :
+  - LockedGallery.tsx : suppression des 3 appels à addPolaroidBorder()
+    (handleSave individuel, handleDownloadAll, handleDownloadPhoto).
+    La bordure étant déjà « cuite » dans l'image à la capture, l'export
+    utilise directement l'image décryptée sans retraitement.
+  - imageProcessor.ts : suppression complète de la fonction
+    addPolaroidBorder() et son commentaire (remplacée par une notice
+    explicative).
+  - index.css : mise à jour du commentaire .polaroid-frame pour
+    référencer addBorder()/addBorderById().
+
+  Fichiers modifiés :
+  - src/components/roll/LockedGallery.tsx (suppression import + 3 appels)
+  - src/lib/imageProcessor.ts (suppression addPolaroidBorder)
+  - src/index.css (mise à jour commentaire)
+  - AI_CHANGELOG.txt (cette entrée)
+
+  Raison :
+    L'utilisateur a signalé que la bordure droite restait plus épaisse
+    même avec des presets symétriques comme « Bordures Larges / Galerie »
+    en raison de l'ancienne logique polaroid encore active à l'export.
+
+---
+==============================================================================
   2026-09-02 — Sélecteur de cadre photo dans la création de rouleau (Force_Frame UI)
 ==============================================================================
 

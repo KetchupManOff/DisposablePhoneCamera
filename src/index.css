@@ -285,12 +285,12 @@ body,
   padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
 }
 
-/* --- Polaroid frame (Lightbox full-view) --- */
+/* --- Photo frame (Lightbox full-view) --- */
 .polaroid-frame {
   background: #fafaf5;
   /* Symmetric padding: the in-app frame is purely decorative.
-     The real orientation-aware Polaroid border is baked into the
-     exported JPEG by addPolaroidBorder(). */
+     The real border is baked into the exported JPEG at capture time
+     by addBorder()/addBorderById() (borderPresets.ts). */
   padding: 3vmin;
   border-radius: 2px;
   box-shadow:
