@@ -177,9 +177,22 @@ export function addBorder(dataUrl: string, preset: BorderPreset): Promise<string
     const img = new Image();
     img.onload = () => {
       const iW = img.naturalWidth, iH = img.naturalHeight;
+      const isLandscape = iW > iH;
       const ms = Math.min(iW, iH), m = preset.margins_percent;
-      const top = Math.round(ms * m.top / 100), bottom = Math.round(ms * m.bottom / 100);
-      const left = Math.round(ms * m.left / 100), right = Math.round(ms * m.right / 100);
+
+      // 2026-09-02 — Rotation des marges selon l'orientation de l'image.
+      // Un vrai tirage Polaroid/Instax ne tourne pas : quand l'appareil est
+      // tenu en paysage, la bordure large du bas devient la bordure droite.
+      // Formule : rotation 90° horaire des marges quand w > h.
+      //   preset.top    → left
+      //   preset.bottom → right
+      //   preset.left   → top
+      //   preset.right  → bottom
+      const top = Math.round(ms * (isLandscape ? m.left : m.top) / 100);
+      const bottom = Math.round(ms * (isLandscape ? m.right : m.bottom) / 100);
+      const left = Math.round(ms * (isLandscape ? m.top : m.left) / 100);
+      const right = Math.round(ms * (isLandscape ? m.bottom : m.right) / 100);
+
       const c = document.createElement('canvas');
       c.width = iW + left + right; c.height = iH + top + bottom;
       const ctx = c.getContext('2d')!;
@@ -303,10 +316,8 @@ export function captureFrame(
 }
 
 /**
- * 2026-09-02 — Ancienne fonction de bordure Polaroid supprimée.
- *
+ * 2026-09-02 — Ancienne fonction addPolaroidBorder supprimée.
  * La bordure est désormais appliquée UNIQUEMENT à la capture via
- * `addBorder()` / `addBorderById()` (presets de `borderPresets.ts`).
- * L'ancienne logique « bordure droite épaisse en paysage » (addPolaroidBorder)
- * provoquait une double application de bordure à l'export.
+ * `addBorder()` / `addBorderById()` avec rotation automatique
+ * des marges selon l'orientation de l'image.
  */

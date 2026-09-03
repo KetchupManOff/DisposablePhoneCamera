@@ -50,6 +50,47 @@ Description :
 ==============================================================================
 
 Description :
+==============================================================================
+  2026-09-02v3 — Rotation des marges selon l'orientation de l'image
+==============================================================================
+
+Description :
+  La fonction addBorder() appliquait les marges du preset littéralement
+  (top → top, bottom → bottom) quelle que soit l'orientation de l'image.
+  Or sur un vrai tirage Polaroid ou Instax, le papier ne tourne pas :
+  quand l'appareil est tenu en paysage, la bordure large du bas devient
+  la bordure droite.
+
+  Correction :
+  - addBorder() détecte maintenant si l'image est en paysage (w > h)
+    et applique une rotation 90° horaire des marges du preset :
+      preset.top    → left
+      preset.bottom → right
+      preset.left   → top
+      preset.right  → bottom
+
+  Effet par preset en mode paysage :
+  | Preset              | Avant (incorrect)      | Après (correct)            |
+  |---------------------|------------------------|----------------------------|
+  | Polaroid Classique  | marge 22% en bas       | marge 22% à droite         |
+  | Instax Mini         | marge 22% en bas       | marge 22% à droite         |
+  | Instax Wide         | marge 22% en bas       | marge 22% à droite         |
+  | Rétro Cartoline     | marge 14% en bas       | marge 14% à droite         |
+  | Bandes Haut & Bas   | bandes 12% haut/bas    | bandes 12% gauche/droite   |
+  | Slim                | identique              | identique (symétrique)     |
+  | Larges / Galerie    | identique              | identique (symétrique)     |
+
+  Pour les presets symétriques (Slim, Larges/Galerie), la rotation ne
+  change rien puisque toutes les marges sont égales.
+
+  Fichiers modifiés :
+  - src/lib/imageProcessor.ts — addBorder() avec isLandscape
+
+  Raison :
+    L'utilisateur a signalé que pour une photo prise en paysage, la
+    bordure large du Polaroid Classique doit être à droite, pas en bas.
+
+---
   Ajout de l'interface de sélection du cadre photo dans le menu de
   configuration du rouleau (écran "Nouvelle pellicule"), conformément à la
   règle Force_Frame du document refs/aboutTheCameras.md.
