@@ -158,9 +158,6 @@ const fr: Record<string, string> = {
 
   /* --- Viewfinder (caméra) --- */
   'viewfinder.loading': 'Chargement...',
-  'viewfinder.switchCamera': 'Changer de caméra',
-  'viewfinder.backCamera': 'Caméra arrière (dos)',
-  'viewfinder.frontCamera': 'Caméra avant (selfie)',
   'viewfinder.timer': 'Minuteur de développement',
   'viewfinder.about': 'À propos',
   'viewfinder.viewRoll': 'Voir le rouleau',
@@ -422,9 +419,6 @@ export const en: Record<string, string> = {
 
   /* --- Viewfinder --- */
   'viewfinder.loading': 'Loading...',
-  'viewfinder.switchCamera': 'Switch camera',
-  'viewfinder.backCamera': 'Back camera',
-  'viewfinder.frontCamera': 'Front camera (selfie)',
   'viewfinder.timer': 'Development timer',
   'viewfinder.about': 'About',
   'viewfinder.viewRoll': 'View the roll',

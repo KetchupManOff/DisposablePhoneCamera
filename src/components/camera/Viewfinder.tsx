@@ -137,7 +137,8 @@ export function Viewfinder({
   onOpenAbout,
 }: ViewfinderProps) {
   const { t } = useI18n();
-  const { videoRef, stream, error, isLoading, isReady, switchCamera, isBackCamera, facingMode } = useCamera();
+  // 2026-09-03 — Selfie mode removed: always use back camera (environment).
+  const { videoRef, stream, error, isLoading, isReady } = useCamera();
   const { capturePhoto, remainingPoses, isFull, canTakePhotos } = useFilmRoll();
   const currentProject = useStore((s) => s.currentProject());
   const updateCurrentProjectSettings = useStore((s) => s.updateCurrentProjectSettings);
@@ -188,8 +189,8 @@ export function Viewfinder({
     // Son d'obturateur (déclenché en même temps que le flash)
     playShutter();
 
-    // Miroir uniquement pour la caméra AVANT (selfie) : l'arrière reste normal.
-    const photo = await capturePhoto(videoRef.current, !isBackCamera);
+    // 2026-09-03 — Selfie mode removed: no mirror needed (always back camera).
+    const photo = await capturePhoto(videoRef.current, false);
     if (photo) {
       setIsCranked(false);
     }
@@ -198,7 +199,7 @@ export function Viewfinder({
     if (torchUsed) {
       await setTorch(false);
     }
-  }, [videoRef, canTakePhotos, capturePhoto, isReady, isBackCamera, isCranked, playShutter, flashEnabled, torchAvailable, setTorch]);
+  }, [videoRef, canTakePhotos, capturePhoto, isReady, isCranked, playShutter, flashEnabled, torchAvailable, setTorch]);
 
   const toggleOrientation = useCallback(() => {
     updateCurrentProjectSettings({
@@ -312,7 +313,6 @@ export function Viewfinder({
             playsInline
             muted
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ transform: !isBackCamera ? 'scaleX(-1)' : undefined }}
           />
 
           {/* Masque de ratio (zone capturée) */}
@@ -397,20 +397,12 @@ export function Viewfinder({
           isCranked={isCranked}
         />
 
-        {/* Boutons utilitaires : orientation, switch caméra, timer, à propos */}
+        {/* Boutons utilitaires : orientation, timer, à propos */}
         <div className="flex flex-row landscape:flex-col items-center gap-1.5">
           <OrientationToggle
             orientation={orientation}
             onChange={toggleOrientation}
           />
-          <button
-            onClick={switchCamera}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-vintage-border/50 flex items-center justify-center text-base hover:border-vintage-accent/60 transition-colors"
-            aria-label={t('viewfinder.switchCamera')}
-            title={facingMode === 'environment' ? t('viewfinder.backCamera') : t('viewfinder.frontCamera')}
-          >
-            {facingMode === 'environment' ? '🎥' : '🤳'}
-          </button>
           {/* 2026-08-29 — Le sablier (réglages timer/développement) n'est accessible
               qu'en mode \"Control freak\". En mode simple, les réglages sont
               verrouillés après la création du rouleau, comme un vrai jetable. */}

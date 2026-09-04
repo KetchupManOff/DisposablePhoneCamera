@@ -17,12 +17,11 @@ interface UseCameraReturn {
   isReady: boolean;
   /** Appareils disponibles */
   devices: MediaDeviceInfo[];
-  /** Caméra active ('environment' = dos, 'user' = avant) */
-  facingMode: FacingMode;
-  /** Vrai si la caméra arrière (dos) est active */
-  isBackCamera: boolean;
-  /** Basculer entre caméras avant/arrière */
-  switchCamera: () => void;
+  /**
+   * 2026-09-03 — Selfie mode removed.
+   * Toujours 'environment' (caméra arrière).
+   * switchCamera, isBackCamera, facingMode supprimés de l'API publique.
+   */
   /** Reprendre le flux (après une pause/veille) */
   startCamera: () => Promise<void>;
   /** Arrêter le flux proprement */
@@ -97,9 +96,7 @@ export function useCamera(): UseCameraReturn {
       const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
       setDevices(videoDevices);
 
-      // Le miroir (isBackCamera) suit la caméra DEMANDÉE, pas la caméra détectée :
-      // `track.getSettings().facingMode` est peu fiable sur iOS Safari (souvent vide
-      // ou inversé), ce qui mettait le miroir sur la mauvaise caméra.
+      // 2026-09-03 — `track.getSettings().facingMode` est peu fiable sur iOS Safari
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -135,11 +132,7 @@ export function useCamera(): UseCameraReturn {
     }
   }, [stopCamera, language]);
 
-  const switchCamera = useCallback(() => {
-    const next = facingMode === 'environment' ? 'user' : 'environment';
-    startCamera(next);
-  }, [facingMode, startCamera]);
-
+  // 2026-09-03 — Selfie mode removed: switchCamera supprimé.
   // Démarrage automatique
   useEffect(() => {
     startCamera();
@@ -155,9 +148,6 @@ export function useCamera(): UseCameraReturn {
     isLoading,
     isReady,
     devices,
-    facingMode,
-    isBackCamera: facingMode === 'environment',
-    switchCamera,
     startCamera,
     stopCamera,
   };
