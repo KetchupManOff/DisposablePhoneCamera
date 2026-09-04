@@ -152,6 +152,19 @@ export function Viewfinder({
   const playShutter = useShutterSound();
   const { torchAvailable, setTorch } = useFlash(stream);
 
+  // Détection de l'orientation physique du device (paysage CSS = landscape)
+  // pour adapter le FlashToggle (horizontal en paysage, vertical en portrait).
+  const [isDeviceLandscape, setIsDeviceLandscape] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(orientation: landscape)').matches,
+  );
+  useEffect(() => {
+    const mql = window.matchMedia('(orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setIsDeviceLandscape(e.matches);
+    mql.addEventListener('change', handler);
+    setIsDeviceLandscape(mql.matches);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
   // Flash torche : ne s'active QUE lors de la capture, comme un vrai flash
   // d'appareil photo jetable. La tige tactile arme le flash ; le déclencheur
   // l'active brièvement (pulse ~200 ms) au moment de la prise de vue.
@@ -386,6 +399,7 @@ export function Viewfinder({
             enabled={flashEnabled}
             onToggle={setFlashEnabled}
             available={torchAvailable}
+            horizontal={isDeviceLandscape}
           />
         )}
 
@@ -398,7 +412,7 @@ export function Viewfinder({
         />
 
         {/* Boutons utilitaires : orientation, timer, à propos */}
-        <div className="flex flex-row landscape:flex-col items-center gap-1.5">
+        <div className="flex flex-row items-center gap-1.5">
           <OrientationToggle
             orientation={orientation}
             onChange={toggleOrientation}

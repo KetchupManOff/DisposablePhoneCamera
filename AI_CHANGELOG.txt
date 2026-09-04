@@ -1,4 +1,32 @@
 ================================================================================
+  2026-09-03 — FlashToggle : variante horizontale en mode paysage
+================================================================================
+
+Description :
+  En mode paysage physique (telephone tourne), la tige de flash s'affiche
+  desormais HORIZONTALEMENT (glissement gauche -> droite) au lieu de rester
+  verticale. Les boutons utilitaires (orientation, timer, a propos) restent
+  egalement en ligne horizontale plutot que de s'empiler verticalement.
+  Resultat : les boutons du panneau droit conservent la meme apparence
+  visuelle qu'en mode portrait.
+
+Fichiers modifies :
+  - src/components/camera/FlashToggle.tsx
+    + Ajout de la prop horizontal?: boolean (defaut: false).
+    + Logique de glissement unifiee : activationDelta() gere les deux axes
+      (vertical = clientY, horizontal = clientX) selon la prop.
+    + Rendu conditionnel : variante verticale (portrait) et horizontale (paysage).
+      La variante horizontale a un boitier allonge (w-16 h-8), tige qui
+      coulisse de gauche a droite, LED a droite, gravure FLASH horizontale.
+
+  - src/components/camera/Viewfinder.tsx
+    + Ajout de isDeviceLandscape (state + useEffect matchMedia) pour detecter
+      l'orientation physique de l'appareil.
+    + Passage de horizontal={isDeviceLandscape} au composant FlashToggle.
+    + Suppression de landscape:flex-col sur le conteneur des boutons
+      utilitaires -> ils restent en ligne horizontale meme en paysage.
+================================================================================
+================================================================================
   AI_CHANGELOG.txt — DisposablePhoneCamera (DispoCam)
   Source unique de vérité pour suivre l'évolution du projet.
 ================================================================================
