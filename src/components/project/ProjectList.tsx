@@ -6,6 +6,7 @@ import { getCamera } from '../../lib/cameras';
 import { useI18n } from '../../i18n/useI18n';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { WelcomeGuide } from '../ui/WelcomeGuide';
+import { TipButton } from '../tips/TipButton';
 import type { TFunction } from '../../i18n/translations';
 
 interface ProjectListProps {
@@ -166,6 +167,9 @@ export function ProjectList({ onSelectProject, onCreateNew }: ProjectListProps) 
             })}
           </div>
         )}
+      </div>
+      <div className="flex justify-center py-3 border-t border-vintage-border/20">
+        <TipButton />
       </div>
       {showInfo && <WelcomeGuide onClose={() => setShowInfo(false)} />}
     </div>

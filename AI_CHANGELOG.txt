@@ -2,6 +2,37 @@
   AI_CHANGELOG.txt — DisposablePhoneCamera (DispoCam)
   Source unique de vérité pour suivre l'évolution du projet.
 ================================================================================
+## 2026-09-03 — Fix GitHub Actions deploy: npm ci cancellation + glob deprecation
+
+### Problème
+Le workflow deploy.yml échouait systématiquement à l'étape `npm ci` avec :
+  Error: The operation was canceled.
+Précédé d'un warning de dépréciation pour `glob@11.1.0` (transitive via
+workbox-build → vite-plugin-pwa@0.21.2).
+
+### Solutions
+- **package.json**: `vite-plugin-pwa` 0.21.2 → 1.3.0 (remplace `glob` par
+  `tinyglobby` en interne, suppression du warning de dépréciation)
+- **package-lock.json**: Régénéré avec `npm install` (0 vulnérabilités)
+- **deploy.yml**:
+  - Ajout `concurrency.group: deploy-${{ github.ref }}` + `cancel-in-progress: true`
+    → évite les conflits entre runs concurrents
+  - Ajout `timeout-minutes: 15` au job et `timeout-minutes: 10` sur l'étape install
+    → échec rapide au lieu de hang indéfini
+  - `npm ci` → `npm ci --no-audit --no-fund --prefer-offline`
+    → plus rapide, évite les hangs de l'audit npm
+## 2026-09-03 — Ajout du lien Ko-Fi sur la page d'accueil (ProjectList)
+
+### Contexte
+Le bouton Ko-Fi (TipButton) était déjà présent dans le WelcomeGuide (écran "À propos")
+mais pas sur la page d'accueil principale où l'utilisateur choisit ou crée un projet.
+
+### Changements
+- **ProjectList.tsx**: Import et ajout du composant `TipButton` dans un footer discret
+  en bas de la page, sous la liste des projets, avec une bordure subtile (`border-t border-vintage-border/20`).
+
+### Fichiers modifiés
+- `src/components/project/ProjectList.tsx`
 
 ---
 ==============================================================================
